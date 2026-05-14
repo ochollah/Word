@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Archive Elite | Ultimate Booklet</title>
+    
+    <!-- Dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { 
+            --gold: #d4af37; 
+            --bg: #050506; 
+            --panel: rgba(20, 20, 22, 0.95); 
+            --border: 1px solid rgba(212, 175, 55, 0.3); 
+            --glow: 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body { 
+            background: var(--bg); 
+            color: #e0e0e0; 
+            font-family: 'Rajdhani', sans-serif; 
+            margin: 0; 
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% 50%, #1a1a1d 0%, #050506 100%);
+        }
+        
+        .navbar { 
+            background: rgba(0, 0, 0, 0.9); 
+            backdrop-filter: blur(15px);
+            border-bottom: var(--border); 
+            padding: 1rem 5%; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+        }
+
+        .logo { 
+            color: var(--gold); 
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700; 
+            letter-spacing: 3px; 
+            font-size: clamp(0.9rem, 4vw, 1.4rem);
+        }
+
+        .container { width: 95%; max-width: 1400px; margin: 0 auto; padding: 20px 0; }
+        
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
+            gap: 25px; 
+        }
+
+        .card { 
+            background: var(--panel); 
+            border: var(--border); 
+            padding: 15px; 
+            cursor: pointer; 
+            border-radius: 12px; 
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1); 
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover { 
+            transform: translateY(-8px); 
+            border-color: var(--gold);
+            box-shadow: var(--glow);
+        }
+
+        .card img { 
+            width: 100%; 
+            aspect-ratio: 1 / 1.4;
+            object-fit: cover; 
+            border-radius: 8px; 
+            margin-bottom: 12px; 
+            border: 1px solid #222;
+        }
+
+        .card h4 {
+            margin: 10px 0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            color: #fff;
+            text-align: center;
+        }
+
+        .btn { 
+            background: transparent; 
+            border: 1px solid var(--gold); 
+            color: var(--gold); 
+            padding: 10px 15px; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            font-size: 10px; 
+            font-weight: 700; 
+            font-family: 'Orbitron';
+            letter-spacing: 1px;
+            transition: 0.3s; 
+            border-radius: 4px;
+        }
+
+        .btn:hover { background: var(--gold); color: #000; }
+
+        #admin-panel { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.95); 
+            z-index: 2000; 
+            align-items: center; 
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .modal { 
+            background: #111; 
+            border: var(--border); 
+            width: 100%; 
+            max-width: 850px; 
+            padding: 25px; 
+            border-radius: 12px; 
+            max-height: 90vh; 
+            overflow-y: auto; 
+        }
+
+        input[type="text"] { 
+            width: 100%; padding: 12px; margin-bottom: 15px; 
+            background: #000; border: 1px solid #333; color: var(--gold); 
+            border-radius: 4px;
+        }
+
+        #editor-container { height: 350px; background: #fff; color: #000; border-radius: 4px; }
+        
+        .page-break { 
+            display: block; border: 2px dashed var(--gold); 
+            text-align: center; padding: 10px; margin: 20px 0; 
+            background: #fff9e6; color: var(--gold); font-weight: bold; 
+        }
+
+        /* Fixed Viewport Stability */
+        #viewer { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: #000; 
+            z-index: 5000; 
+            overflow: hidden;
+        }
+
+        .viewer-nav { 
+            height: 60px;
+            padding: 0 20px; 
+            background: #000; 
+            border-bottom: 1px solid #222; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+
+        #book-viewport { 
+            position: relative;
+            width: 100vw;
+            height: calc(100vh - 60px); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            background: #080808;
+        }
+        
+        /* Turn.js Container Styling */
+        #flipbook { 
+            margin: auto;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        .page { background: white; color: #111; overflow: hidden; position: relative; }
+        .page-content { padding: 8% 10%; height: 100%; overflow-y: auto; box-sizing: border-box; }
+        
+        .page.hard { 
+            background: #0e0e0e !important; 
+            color: var(--gold) !important; 
+            border: 8px double var(--gold); 
+            display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; text-align: center;
+        }
+
+        .cover-img { width: 75%; height: auto; max-height: 400px; object-fit: cover; border: 1px solid var(--gold); margin: 15px 0; }
+
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr 1fr; gap: 15px; }
+            .navbar { padding: 0.8rem 15px; }
+            .logo { font-size: 0.8rem; }
+            .modal { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">ELITE_ARCHIVE_V6</div>
+    <div id="auth-zone">
+        <button class="btn" id="login-btn" onclick="handleAuth()">Access</button>
+        <div class="admin-only" style="display:none; gap:8px;">
+            <button class="btn" onclick="openCreator()">+ NEW</button>
+            <button class="btn" onclick="logout()" style="border-color:#ff4d4d; color:#ff4d4d;">EXIT</button>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div id="gallery" class="grid"></div>
+</div>
+
+<div id="admin-panel">
+    <div class="modal">
+        <h3 style="color:var(--gold); font-family:'Orbitron'; margin-bottom:15px;">ARCHIVE COMPILER</h3>
+        <input type="hidden" id="edit-id">
+        <input type="text" id="theme" placeholder="DOCUMENT TITLE">
+        <div style="background:#000; padding:12px; border:1px solid #333; margin-bottom:12px; border-radius:4px;">
+            <label style="color:var(--gold); font-size:9px; font-family:'Orbitron';">COVER IMAGE (PORTRAIT)</label><br>
+            <input type="file" id="cover-upload" accept="image/*" style="margin-top:8px; font-size:11px;">
+        </div>
+        <div id="editor-container"></div>
+        <input type="text" id="reference" placeholder="REFERENCE URL" style="margin-top:12px;">
+        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:15px;">
+            <button class="btn" id="save-btn" onclick="processAndSave()">PUBLISH</button>
+            <button class="btn" style="border-color:#444; color:#444;" onclick="$('#admin-panel').fadeOut()">CANCEL</button>
+        </div>
+    </div>
+</div>
+
+<div id="viewer">
+    <div class="viewer-nav">
+        <button class="btn" onclick="closeViewer()">CLOSE</button>
+        <span style="color:var(--gold); font-family:'Orbitron'; font-size:9px; letter-spacing:1px;">RECORD_VIEWER</span>
+        <button class="btn" onclick="generatePDF()">EXPORT</button>
+    </div>
+    <div id="book-viewport">
+        <div id="flipbook"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const firebaseConfig = {
+  apiKey: "AIzaSyBKxdIxwLrAuQ1DnlrP57KXz39VYBbn2Ns",
+  authDomain: "word-5592c.firebaseapp.com",
+  projectId: "word-5592c",
+  storageBucket: "word-5592c.firebasestorage.app",
+  messagingSenderId: "352185501602",
+  appId: "1:352185501602:web:1372f15784d0ade32994fb",
+  measurementId: "G-0QNMZ6G4ZN"
+};
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    const BlockEmbed = Quill.import('blots/block/embed');
+    class PageBreak extends BlockEmbed {
+        static create() {
+            let node = super.create();
+            node.setAttribute('class', 'page-break');
+            node.innerHTML = "--- PAGE BREAK ---";
+            return node;
+        }
+    }
+    PageBreak.blotName = 'pagebreak';
+    PageBreak.tagName = 'div';
+    Quill.register(PageBreak);
+
+    const quill = new Quill('#editor-container', { 
+        theme: 'snow', 
+        modules: { 
+            toolbar: {
+                container: [[{'header': [1, 2, false]}], ['bold', 'italic'], ['image'], [{'list': 'bullet'}], ['pagebreak'], ['clean']],
+                handlers: { 'pagebreak': function() {
+                    const range = this.quill.getSelection();
+                    if (range) { this.quill.insertEmbed(range.index, 'pagebreak', true); this.quill.setSelection(range.index + 1); }
+                }}
+            }
+        }
+    });
+
+    $('.ql-pagebreak').html('<b>PAGE</b>');
+
+    window.handleAuth = async () => {
+        const e = prompt("ID:"), p = prompt("CODE:");
+        if(e && p) try { await signInWithEmailAndPassword(auth, e, p); } catch(err) { alert("Access Denied"); }
+    };
+
+    window.logout = () => signOut(auth).then(() => location.reload());
+
+    window.openCreator = () => {
+        $("#edit-id").val(""); $("#theme, #reference, #cover-upload").val("");
+        quill.root.innerHTML = ""; window.tempCover = "";
+        $("#admin-panel").css('display', 'flex').hide().fadeIn();
+    };
+
+    window.processAndSave = async () => {
+        const id = $("#edit-id").val(), theme = $("#theme").val(), content = quill.root.innerHTML, file = $("#cover-upload")[0].files[0];
+        if(!theme) return alert("Title required");
+        $("#save-btn").text("SYNCING...").prop("disabled", true);
+        try {
+            let coverData = window.tempCover || "";
+            if(file) {
+                coverData = await new Promise(res => {
+                    const reader = new FileReader(); reader.readAsDataURL(file);
+                    reader.onload = e => {
+                        const img = new Image(); img.src = e.target.result;
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = 500; canvas.height = 700;
+                            canvas.getContext('2d').drawImage(img, 0, 0, 500, 700);
+                            res(canvas.toDataURL('image/jpeg', 0.8));
+                        };
+                    };
+                });
+            }
+            const data = { theme, content, cover: coverData, reference: $("#reference").val(), updated: Date.now() };
+            if(id) await updateDoc(doc(db, "booklets", id), data);
+            else await addDoc(collection(db, "booklets"), data);
+            location.reload();
+        } catch(e) { alert(e.message); $("#save-btn").text("PUBLISH").prop("disabled", false); }
+    };
+
+    window.openReader = (data) => {
+        $("#viewer").fadeIn(200);
+        const fb = $("#flipbook");
+        if (fb.data('turn')) fb.turn('destroy');
+        fb.empty();
+
+        fb.append(`<div class="page hard">
+            <div style="padding:30px; text-align:center;">
+                <h2 style="font-size:1.4rem; font-family:'Orbitron'; color:#000;">${data.theme}</h2>
+                <img src="${data.cover}" class="cover-img">
+                <p style="font-size:9px; margin-top:20px; opacity:0.5;">ARCHIVE_REF: ${data.reference}</p>
+            </div>
+        </div>`);
+
+        const chunks = data.content.split('<div class="page-break">--- PAGE BREAK ---</div>');
+        chunks.forEach((chunk, i) => {
+            fb.append(`<div class="page">
+                <div class="page-content ql-editor">
+                    <small style="color:#aaa; font-size:8px;">PAGE ${i+1}</small><hr style="opacity:0.1;">
+                    ${chunk}
+                </div>
+            </div>`);
+        });
+
+        fb.append(`<div class="page hard"><h3 style="font-family:'Orbitron';">END OF RECORD</h3></div>`);
+
+        // Stability Scaling
+        const vW = $(window).width(), vH = $(window).height() - 60;
+        let bookW, bookH;
+
+        if(vW > 1000) { bookW = 900; bookH = 650; }
+        else if(vW > 600) { bookW = vW * 0.85; bookH = bookW * 0.7; }
+        else { bookW = vW * 0.95; bookH = vH * 0.85; }
+
+        setTimeout(() => {
+            fb.turn({ 
+                width: bookW, height: bookH, 
+                display: (vW > 700) ? 'double' : 'single', 
+                acceleration: true, gradients: true, elevation: 50 
+            });
+        }, 300);
+    };
+
+    window.editEntry = (id, data) => {
+        $("#edit-id").val(id); $("#theme").val(data.theme); $("#reference").val(data.reference);
+        quill.root.innerHTML = data.content; window.tempCover = data.cover;
+        $("#admin-panel").css('display', 'flex').hide().fadeIn();
+    };
+
+    window.deleteEntry = async (id) => {
+        if(confirm("Confirm deletion?")) { await deleteDoc(doc(db, "booklets", id)); location.reload(); }
+    };
+
+    window.closeViewer = () => { $("#viewer").fadeOut(200); if($("#flipbook").data('turn')) $("#flipbook").turn('destroy').empty(); };
+
+    window.generatePDF = async () => {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'pt', 'a4');
+        const pgs = document.querySelectorAll('.page');
+        for (let i = 0; i < pgs.length; i++) {
+            const canvas = await html2canvas(pgs[i], { scale: 2 });
+            if (i > 0) pdf.addPage();
+            pdf.addImage(canvas.toDataURL('image/jpeg', 1.0), 'JPEG', 0, 0, 595, 842);
+        }
+        pdf.save("Record_Export.pdf");
+    };
+
+    onAuthStateChanged(auth, (user) => {
+        if(user) { $(".admin-only").css('display','flex'); $("#login-btn").hide(); }
+        fetchData();
+    });
+
+    const fetchData = async () => {
+        const snap = await getDocs(query(collection(db, "booklets"), orderBy("updated", "desc")));
+        const gal = $("#gallery").empty();
+        snap.forEach(d => {
+            const data = d.data();
+            const ds = JSON.stringify(data).replace(/'/g, "&apos;");
+            gal.append(`
+                <div class="card">
+                    <img src="${data.cover}" onclick='openReader(${ds})'>
+                    <h4>${data.theme}</h4>
+                    <div class="admin-only" style="display:${auth.currentUser?'flex':'none'}; justify-content:center; gap:8px; margin-top:10px;">
+                        <button class="btn" style="padding:5px 10px; flex:1;" onclick='editEntry("${d.id}", ${ds})'>EDIT</button>
+                        <button class="btn" style="padding:5px 10px; flex:1; border-color:#ff4d4d; color:#ff4d4d;" onclick='deleteEntry("${d.id}")'>DEL</button>
+                    </div>
+                </div>
+            `);
+        });
+    };
+</script>
+</body>
+</html>
