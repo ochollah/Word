@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BIBLE STUDY</title>
     
-    <!-- CSS Dependencies -->
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" crossorigin="anonymous">
+    <!-- CSS Dependencies (Updated to JSDelivr for reliability) -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -163,6 +163,11 @@
             font-family: var(--font-main);
         }
 
+        /* Editor Modal Layout */
+        .editor-wrapper {
+            margin-bottom: 15px;
+        }
+
         .ql-toolbar.ql-snow {
             background: #1a1a1c;
             border-color: #333 !important;
@@ -262,7 +267,6 @@
             flex-direction: column;
         }
 
-        /* Pure Image Cover Page Styling */
         .page-cover {
             position: absolute;
             inset: 0;
@@ -361,7 +365,7 @@
 <div id="admin-panel">
     <div class="modal">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3 style="color:var(--gold); font-family:var(--font-tech); margin:0;">ARCHIVE COMPILER</h3>
+            <h3 style="color:var(--gold); font-family:var(--font-tech); margin:0;" id="admin-modal-title">ARCHIVE COMPILER</h3>
             <button class="btn btn-danger" onclick="closeAdmin()">EXIT</button>
         </div>
         
@@ -373,7 +377,9 @@
             <input type="file" id="cover-upload" accept="image/*" style="margin-top:8px; font-size:11px;">
         </div>
         
-        <div id="editor-container"></div>
+        <div class="editor-wrapper">
+            <div id="editor-container"></div>
+        </div>
         
         <input type="text" id="reference" placeholder="REFERENCE URL" style="margin-top:12px;">
         
@@ -392,60 +398,56 @@
             <button class="btn btn-danger" onclick="closeViewer(event)">EXIT</button>
         </div>
     </div>
-    <!-- Tapping screen advances through Cover -> Page 1 -> Page 2 ... -> End -> Cover... -->
     <div id="book-viewport" onclick="nextPageLoop()">
         <div id="flipbook"></div>
         <div class="nav-hint">TAP ANYWHERE TO READ</div>
     </div>
 </div>
 
-<!-- JS Dependencies -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.quilljs.com/1.3.6/quill.js" crossorigin="anonymous"></script>
+<!-- Synchronous JS Dependencies with CDN fallbacks -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
 
-<!-- Firebase Application Module -->
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+<!-- Global Script execution before Module -->
+<script>
+    window.quillInstance = null;
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyBKxdIxwLrAuQ1DnlrP57KXz39VYBbn2Ns",
-        authDomain: "word-5592c.firebaseapp.com",
-        projectId: "word-5592c",
-        storageBucket: "word-5592c.firebasestorage.app",
-        messagingSenderId: "352185501602",
-        appId: "1:352185501602:web:1372f15784d0ade32994fb",
-        measurementId: "G-0QNMZ6G4ZN"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-
-    let quill = null;
-    let currentPage = 0;
-    let totalPages = 0;
-    
-    window.bookletStore = {};
-
-    if (typeof Quill !== "undefined") {
-        const BlockEmbed = Quill.import('blots/block/embed');
-        class PageBreak extends BlockEmbed {
-            static create() {
-                let node = super.create();
-                node.setAttribute('class', 'page-break');
-                node.innerHTML = "--- PAGE BREAK ---";
-                return node;
+    function registerQuillPageBreak() {
+        if (typeof Quill !== "undefined" && !window.pageBreakRegistered) {
+            try {
+                var BlockEmbed = Quill.import('blots/block/embed');
+                class PageBreak extends BlockEmbed {
+                    static create() {
+                        let node = super.create();
+                        node.setAttribute('class', 'page-break');
+                        node.innerHTML = "--- PAGE BREAK ---";
+                        return node;
+                    }
+                }
+                PageBreak.blotName = 'pagebreak';
+                PageBreak.tagName = 'div';
+                Quill.register(PageBreak, true);
+                window.pageBreakRegistered = true;
+            } catch(e) {
+                console.warn("Blot registration skipped or already exists", e);
             }
         }
-        PageBreak.blotName = 'pagebreak';
-        PageBreak.tagName = 'div';
-        Quill.register(PageBreak, true);
+    }
 
-        quill = new Quill('#editor-container', { 
+    function initQuillEditor() {
+        if (typeof Quill === "undefined") {
+            alert("Quill script blocked or taking time to load. Check internet connection.");
+            return false;
+        }
+
+        registerQuillPageBreak();
+
+        // Reset target container DOM
+        $(".editor-wrapper").html('<div id="editor-container"></div>');
+
+        window.quillInstance = new Quill('#editor-container', { 
             theme: 'snow', 
             modules: { 
                 toolbar: {
@@ -470,7 +472,34 @@
             }
         });
         $('.ql-pagebreak').html('<b>PAGE</b>');
+        return true;
     }
+</script>
+
+<!-- Firebase Application Module -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBKxdIxwLrAuQ1DnlrP57KXz39VYBbn2Ns",
+        authDomain: "word-5592c.firebaseapp.com",
+        projectId: "word-5592c",
+        storageBucket: "word-5592c.firebasestorage.app",
+        messagingSenderId: "352185501602",
+        appId: "1:352185501602:web:1372f15784d0ade32994fb",
+        measurementId: "G-0QNMZ6G4ZN"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let currentPage = 0;
+    let totalPages = 0;
+    
+    window.bookletStore = {};
 
     window.handleAuth = async () => {
         const e = prompt("ID:"), p = prompt("CODE:");
@@ -486,43 +515,95 @@
     window.logout = () => signOut(auth).then(() => location.reload());
 
     window.openCreator = () => {
+        $("#admin-modal-title").text("ARCHIVE COMPILER");
+        $("#save-btn").text("PUBLISH");
         $("#edit-id").val(""); 
         $("#theme, #reference, #cover-upload").val("");
-        if (quill) quill.root.innerHTML = "";
         window.tempCover = "";
-        $("#admin-panel").css('display', 'flex').hide().fadeIn();
+        
+        // Modal displayed prior to initializing Quill so CSS measurements are calculated properly
+        $("#admin-panel").css('display', 'flex').hide().fadeIn(200, () => {
+            if (initQuillEditor() && window.quillInstance) {
+                window.quillInstance.setText('');
+            }
+        });
     };
 
-    window.closeAdmin = () => $("#admin-panel").fadeOut();
+    window.editEntry = (id, event) => {
+        if(event) event.stopPropagation();
+        const data = window.bookletStore[id];
+        if(!data) return alert("Record unavailable for editing.");
+
+        $("#admin-modal-title").text("EDIT ARCHIVE RECORD");
+        $("#save-btn").text("UPDATE");
+        $("#edit-id").val(id); 
+        $("#theme").val(data.theme || ""); 
+        $("#reference").val(data.reference || "");
+        window.tempCover = data.cover || "";
+
+        $("#admin-panel").css('display', 'flex').hide().fadeIn(200, () => {
+            if (initQuillEditor() && window.quillInstance) {
+                window.quillInstance.clipboard.dangerouslyPasteHTML(data.content || "");
+            }
+        });
+    };
+
+    window.closeAdmin = () => {
+        $("#admin-panel").fadeOut();
+        $("#edit-id").val("");
+        if (window.quillInstance) window.quillInstance.setText('');
+    };
 
     window.processAndSave = async () => {
-        const id = $("#edit-id").val(), theme = $("#theme").val(), content = quill ? quill.root.innerHTML : "", file = $("#cover-upload")[0].files[0];
+        const id = $("#edit-id").val();
+        const theme = $("#theme").val();
+        const content = window.quillInstance ? window.quillInstance.root.innerHTML : "";
+        const file = $("#cover-upload")[0].files[0];
+
         if(!theme) return alert("Title required");
+        
         $("#save-btn").text("SYNCING...").prop("disabled", true);
         try {
             let coverData = window.tempCover || "";
             if(file) {
                 coverData = await new Promise(res => {
-                    const reader = new FileReader(); reader.readAsDataURL(file);
+                    const reader = new FileReader(); 
+                    reader.readAsDataURL(file);
                     reader.onload = e => {
-                        const img = new Image(); img.src = e.target.result;
+                        const img = new Image(); 
+                        img.src = e.target.result;
                         img.onload = () => {
                             const canvas = document.createElement('canvas');
-                            canvas.width = 600; canvas.height = 850;
+                            canvas.width = 600; 
+                            canvas.height = 850;
                             canvas.getContext('2d').drawImage(img, 0, 0, 600, 850);
                             res(canvas.toDataURL('image/jpeg', 0.85));
                         };
                     };
                 });
             }
-            const data = { theme, content, cover: coverData, reference: $("#reference").val(), updated: Date.now() };
-            if(id) await updateDoc(doc(db, "booklets", id), data);
-            else await addDoc(collection(db, "booklets"), data);
+
+            const data = { 
+                theme, 
+                content, 
+                cover: coverData, 
+                reference: $("#reference").val(), 
+                updated: Date.now() 
+            };
+
+            if(id) {
+                await updateDoc(doc(db, "booklets", id), data);
+            } else {
+                await addDoc(collection(db, "booklets"), data);
+            }
+            
             location.reload();
-        } catch(e) { alert("Save error: " + e.message); $("#save-btn").text("PUBLISH").prop("disabled", false); }
+        } catch(e) { 
+            alert("Save error: " + e.message); 
+            $("#save-btn").text(id ? "UPDATE" : "PUBLISH").prop("disabled", false); 
+        }
     };
 
-    // Cyclic Reader: Page 0 is purely Cover Image
     window.openReader = (id) => {
         const data = window.bookletStore[id];
         if (!data) return alert("Record not found.");
@@ -530,7 +611,6 @@
         $("#viewer").fadeIn(200);
         const fb = $("#flipbook").empty();
 
-        // 1. Cover Page - Full Cover Image Display
         if (data.cover && data.cover.trim().length > 0) {
             fb.append(`
                 <div class="page active">
@@ -539,7 +619,6 @@
                 </div>
             `);
         } else {
-            // Fallback Cover if no image was uploaded
             fb.append(`
                 <div class="page hard active">
                     <div style="padding:30px; text-align:center;">
@@ -550,7 +629,6 @@
             `);
         }
 
-        // 2. Parse Quill Content into Individual Pages
         const contentHtml = data.content || "";
         let pages = [];
 
@@ -580,7 +658,6 @@
         pages = pages.filter(p => p.trim().length > 0);
         if (pages.length === 0) pages = ["<p>No content available.</p>"];
 
-        // Append Article Pages (Page 1, Page 2...)
         pages.forEach((pageContent, i) => {
             fb.append(`
                 <div class="page">
@@ -595,7 +672,6 @@
             `);
         });
 
-        // 3. Last Page / End Summary
         const totalWords = contentHtml.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(Boolean).length;
 
         fb.append(`
@@ -620,7 +696,6 @@
         updatePageVisibility();
     };
 
-    // Cycle through: Cover Image -> Page 1 -> Page 2 ... -> End -> Cover Image
     window.nextPageLoop = () => {
         currentPage = (currentPage + 1) % totalPages;
         updatePageVisibility();
@@ -631,18 +706,6 @@
         pages.removeClass("active");
         $(pages[currentPage]).addClass("active");
     }
-
-    window.editEntry = (id, event) => {
-        if(event) event.stopPropagation();
-        const data = window.bookletStore[id];
-        if(!data) return;
-        $("#edit-id").val(id); 
-        $("#theme").val(data.theme); 
-        $("#reference").val(data.reference);
-        if (quill) quill.root.innerHTML = data.content || ""; 
-        window.tempCover = data.cover;
-        $("#admin-panel").css('display', 'flex').hide().fadeIn();
-    };
 
     window.deleteEntry = async (id, event) => {
         if(event) event.stopPropagation();
