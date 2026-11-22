@@ -1,772 +1,1297 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BIBLE STUDY</title>
-    
-    <!-- CSS Dependencies (Updated to JSDelivr for reliability) -->
-    <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        :root { 
-            --gold: #d4af37; 
-            --bg: #050506; 
-            --panel: rgba(20, 20, 22, 0.95); 
-            --border: 1px solid rgba(212, 175, 55, 0.3); 
-            --glow: 0 0 15px rgba(212, 175, 55, 0.2);
-            --font-main: 'Inter', sans-serif;
-            --font-tech: 'Orbitron', sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#050506">
+<meta name="description" content="BIBLE STUDY — an interactive archive of study booklets you can read, like, save and share.">
+<meta property="og:title" content="BIBLE STUDY">
+<meta property="og:description" content="Read, save and share Bible study booklets.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23050506'/%3E%3Cpath d='M14 5h4v8h8v4h-8v10h-4V17H6v-4h8z' fill='%23d4af37'/%3E%3C/svg%3E">
+<title>BIBLE STUDY</title>
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+<link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet">
 
-        body { 
-            background: var(--bg); 
-            color: #e0e0e0; 
-            font-family: var(--font-main); 
-            margin: 0; 
-            overflow-x: hidden;
-            background-image: radial-gradient(circle at 50% 50%, #1a1a1d 0%, #050506 100%);
-        }
-        
-        .navbar { 
-            background: rgba(0, 0, 0, 0.9); 
-            backdrop-filter: blur(15px);
-            border-bottom: var(--border); 
-            padding: 1rem 5%; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            position: sticky; 
-            top: 0; 
-            z-index: 1000; 
-        }
+<style>
+:root{
+  --gold:#d4af37; --gold-2:#f5d97a; --bg:#050506;
+  --panel:rgba(20,20,22,.92); --border:1px solid rgba(212,175,55,.3);
+  --glow:0 0 15px rgba(212,175,55,.2); --danger:#ff4d4d;
+  --font-main:'Inter',sans-serif; --font-tech:'Orbitron',sans-serif;
+  --font-serif:'Cormorant Garamond',Georgia,serif;
+  --ease:cubic-bezier(.23,1,.32,1);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:#e0e0e0;font-family:var(--font-main);margin:0;overflow-x:hidden;
+  background-image:radial-gradient(circle at 50% 0%,#1d1b14 0%,#0b0b0d 45%,#050506 100%);background-attachment:fixed;min-height:100vh}
+body.no-scroll{overflow:hidden}
+::selection{background:rgba(212,175,55,.35)}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#3a3320;border-radius:8px}::-webkit-scrollbar-track{background:transparent}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+svg.ico{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#dust{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+body.reading #dust{display:none}
+.navbar,.container,.hero{position:relative;z-index:1}
 
-        .logo { 
-            color: var(--gold); 
-            font-family: var(--font-tech);
-            font-weight: 700; 
-            letter-spacing: 3px; 
-            font-size: clamp(0.9rem, 4vw, 1.4rem);
-        }
+/* Navbar */
+.navbar{background:rgba(0,0,0,.82);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);border-bottom:var(--border);
+  padding:.9rem 5%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:1000}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--font-tech);font-weight:700;letter-spacing:3px;font-size:clamp(.9rem,4vw,1.4rem);
+  background:linear-gradient(90deg,var(--gold),var(--gold-2),var(--gold));background-size:200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s linear infinite}
+.logo svg{width:22px;height:22px;stroke:var(--gold);-webkit-text-fill-color:initial}
+@keyframes shine{to{background-position:200% 0}}
+#auth-zone{display:flex;align-items:center;justify-content:flex-end;gap:10px}
+.admin-only{display:none;align-items:center;justify-content:flex-end;gap:8px}
+body.is-admin .admin-only{display:flex}
+body.is-admin #login-btn{display:none}
 
-        #auth-zone {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 10px;
-        }
+/* Buttons */
+.btn{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:10px 15px;cursor:pointer;text-transform:uppercase;font-size:10px;font-weight:700;
+  font-family:var(--font-tech);letter-spacing:1px;transition:.3s;border-radius:4px;display:inline-flex;align-items:center;gap:6px;position:relative;overflow:hidden}
+.btn:hover{background:var(--gold);color:#000}
+.btn:disabled{opacity:.5;cursor:wait}
+.btn-danger{border-color:var(--danger)!important;color:var(--danger)!important}
+.btn-danger:hover{background:var(--danger)!important;color:#fff!important}
+.btn-solid{background:var(--gold);color:#000}.btn-solid:hover{background:var(--gold-2)}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.35);transform:scale(0);animation:rip .6s linear;pointer-events:none}
+@keyframes rip{to{transform:scale(4);opacity:0}}
+.icon-btn{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid rgba(212,175,55,.35);
+  background:rgba(0,0,0,.55);color:var(--gold);cursor:pointer;font-size:16px;transition:.25s;backdrop-filter:blur(6px);position:relative;flex:none;font-family:var(--font-tech)}
+.icon-btn:hover{background:var(--gold);color:#000;transform:scale(1.08)}
+.icon-btn.on{background:var(--gold);color:#000}
+.icon-btn.on svg{fill:currentColor}
+.icon-btn .cnt{position:absolute;top:-6px;right:-6px;background:var(--gold);color:#000;font-size:9px;font-weight:700;border-radius:10px;padding:1px 5px;font-family:var(--font-main)}
 
-        .admin-only {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 8px;
-        }
+/* Hero */
+.hero{width:95%;max-width:1400px;margin:28px auto 8px;display:grid;grid-template-columns:1.5fr 1fr;gap:20px}
+.verse-card{background:linear-gradient(135deg,rgba(212,175,55,.12),rgba(20,20,22,.9));border:var(--border);border-radius:16px;padding:28px;position:relative;overflow:hidden}
+.verse-card::after{content:"\201C";position:absolute;right:18px;top:-30px;font-size:180px;font-family:var(--font-serif);color:rgba(212,175,55,.08);line-height:1}
+.eyebrow{font-family:var(--font-tech);font-size:10px;letter-spacing:3px;color:var(--gold);opacity:.85}
+.verse-text{font-family:var(--font-serif);font-style:italic;font-weight:500;font-size:clamp(1.25rem,3.4vw,1.9rem);line-height:1.4;margin:14px 0 10px;color:#f3ecd2}
+.verse-ref{font-family:var(--font-tech);font-size:11px;letter-spacing:2px;color:var(--gold)}
+.verse-actions{display:flex;gap:10px;margin-top:18px}
+.stats-card{background:var(--panel);border:var(--border);border-radius:16px;padding:24px;display:flex;flex-direction:column;justify-content:space-between;gap:16px}
+.greet{font-family:var(--font-tech);font-size:clamp(1rem,2.6vw,1.3rem);color:#fff;margin:6px 0 0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{text-align:center;background:rgba(0,0,0,.4);border:1px solid #222;border-radius:10px;padding:12px 6px}
+.stat b{display:block;font-family:var(--font-tech);font-size:1.3rem;color:var(--gold)}
+.stat span{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#999}
 
-        .container { width: 95%; max-width: 1400px; margin: 0 auto; padding: 20px 0; }
-        
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
-            gap: 25px; 
-        }
+/* Toolbar */
+.container{width:95%;max-width:1400px;margin:0 auto;padding:12px 0 60px}
+.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:14px 0 22px;position:sticky;top:62px;z-index:900;padding:10px;border-radius:12px;
+  background:rgba(8,8,10,.8);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(212,175,55,.15)}
+.search{flex:1 1 220px;position:relative;min-width:160px}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gold);opacity:.8}
+.search input{padding-left:38px!important;margin:0!important;padding-right:34px!important}
+.search kbd{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10px;border:1px solid #444;border-radius:4px;padding:1px 6px;color:#888}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:8px 14px;border-radius:999px;border:1px solid #333;background:#0c0c0e;color:#bbb;font-size:12px;cursor:pointer;transition:.25s;font-family:var(--font-main)}
+.chip:hover{border-color:var(--gold);color:var(--gold)}
+.chip.on{background:var(--gold);color:#000;border-color:var(--gold);font-weight:600}
+select{background:#000;border:1px solid #333;color:var(--gold);border-radius:6px;padding:9px 10px;font-family:var(--font-main);font-size:12px}
 
-        .card { 
-            background: var(--panel); 
-            border: var(--border); 
-            padding: 15px; 
-            cursor: pointer; 
-            border-radius: 12px; 
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1); 
-            display: flex;
-            flex-direction: column;
-        }
+/* Grid & cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:25px}
+.grid.list{grid-template-columns:1fr;gap:14px}
+.card{background:var(--panel);border:var(--border);padding:15px;cursor:pointer;border-radius:12px;display:flex;flex-direction:column;position:relative;
+  transition:transform .4s var(--ease),border-color .3s,box-shadow .3s;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+  animation:fadeUp .6s var(--ease) both;animation-delay:calc(var(--i,0)*45ms);overflow:hidden}
+.card::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(212,175,55,.12) 50%,transparent 70%);
+  transform:translateX(-100%);transition:transform .8s var(--ease);pointer-events:none}
+.card:hover{transform:perspective(900px) translateY(-8px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));border-color:var(--gold);box-shadow:var(--glow),0 20px 40px rgba(0,0,0,.5)}
+.card:hover::before{transform:translateX(100%)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1}}
+.card-media{position:relative;margin-bottom:12px}
+.card img{width:100%;aspect-ratio:1/1.4;object-fit:cover;border-radius:8px;border:1px solid #222;display:block;background:#111}
+.badge{position:absolute;left:8px;top:8px;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);color:var(--gold);font-size:10px;padding:4px 8px;border-radius:999px;font-family:var(--font-tech);display:flex;gap:4px;align-items:center;border:1px solid rgba(212,175,55,.3)}
+.card .save{position:absolute;right:8px;top:8px;width:32px;height:32px}
+.card-progress{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.1);border-radius:0 0 8px 8px;overflow:hidden}
+.card-progress i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-2))}
+.card h4{margin:6px 0 10px;font-family:var(--font-tech);font-size:.85rem;color:#fff;text-align:center;line-height:1.4}
+.card-meta{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:auto;font-size:12px;color:#9a9a9a}
+.meta-btn{background:none;border:none;color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:6px 8px;border-radius:8px;font-size:12px;font-family:var(--font-main);transition:.2s}
+.meta-btn:hover{background:rgba(212,175,55,.12);color:var(--gold)}
+.meta-btn.liked{color:#ff6b81}.meta-btn.liked svg{fill:currentColor}
+.card-admin{justify-content:center;gap:8px;margin-top:10px}
+.card-admin .btn{padding:5px 10px;flex:1;justify-content:center}
+.grid.list .card{flex-direction:row;align-items:center;gap:16px}
+.grid.list .card-media{width:84px;margin:0;flex:none}
+.grid.list .badge{display:none}.grid.list .card .save{display:none}
+.grid.list .card h4{text-align:left;flex:1;margin:0}
+.grid.list .card-meta{margin:0}
+.skeleton{height:420px;border-radius:12px;background:linear-gradient(100deg,#111 30%,#1c1a12 50%,#111 70%);background-size:200% 100%;animation:skel 1.3s infinite;border:var(--border)}
+@keyframes skel{to{background-position:-200% 0}}
+.empty{grid-column:1/-1;text-align:center;padding:70px 20px;color:#888}
+.empty svg{width:52px;height:52px;color:var(--gold);opacity:.6;margin-bottom:12px}
+.empty h3{font-family:var(--font-tech);color:#ddd;margin:8px 0}
 
-        .card:hover { 
-            transform: translateY(-8px); 
-            border-color: var(--gold);
-            box-shadow: var(--glow);
-        }
+/* Overlays / modals */
+#admin-panel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:2000;align-items:center;justify-content:center;padding:15px}
+.modal{background:#111;border:var(--border);width:100%;max-width:850px;padding:25px;border-radius:12px;max-height:90vh;overflow-y:auto}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:16px;z-index:7000}
+.overlay.open{display:flex;animation:fadeIn .25s}
+@keyframes fadeIn{from{opacity:0}}
+.sheet{background:#111;border:var(--border);border-radius:16px;width:100%;max-width:440px;padding:22px;animation:pop .35s var(--ease);box-shadow:0 30px 80px rgba(0,0,0,.7)}
+@keyframes pop{from{transform:translateY(30px) scale(.96);opacity:0}}
+.sheet h3{font-family:var(--font-tech);color:var(--gold);margin:0 0 6px;font-size:1rem}
+.sheet p{color:#aaa;font-size:13px;margin:6px 0 14px;line-height:1.5}
+.row-end{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}
+input[type="text"],input[type="email"],input[type="password"],textarea.field{width:100%;padding:12px;margin-bottom:15px;background:#000;border:1px solid #333;color:var(--gold);border-radius:4px;font-family:var(--font-main);font-size:14px}
+input:focus,textarea:focus{border-color:var(--gold);outline:none;box-shadow:var(--glow)}
+.err{color:var(--danger);font-size:12px;min-height:16px;margin:-6px 0 8px}
+.share-url{display:flex;gap:8px}.share-url input{margin:0}
+.share-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.share-opt{display:flex;flex-direction:column;align-items:center;gap:6px;background:#0a0a0c;border:1px solid #2a2a2a;border-radius:12px;padding:12px 4px;color:#ccc;font-size:11px;cursor:pointer;transition:.25s;font-family:var(--font-main)}
+.share-opt:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-3px)}
+.share-opt b{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:#000;background:var(--c,var(--gold))}
 
-        .card img { 
-            width: 100%; 
-            aspect-ratio: 1 / 1.4;
-            object-fit: cover; 
-            border-radius: 8px; 
-            margin-bottom: 12px; 
-            border: 1px solid #222;
-        }
+/* Editor */
+.cover-box{background:#000;padding:12px;border:1px solid #333;margin-bottom:12px;border-radius:4px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.cover-box label{color:var(--gold);font-size:9px;font-family:var(--font-tech)}
+#cover-preview{width:56px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #333;display:none}
+.editor-wrapper{margin-bottom:8px}
+.ql-toolbar.ql-snow{background:#1a1a1c;border-color:#333!important;border-top-left-radius:4px;border-top-right-radius:4px}
+.ql-stroke{stroke:var(--gold)!important}.ql-fill{fill:var(--gold)!important}.ql-picker{color:var(--gold)!important}
+.ql-snow .ql-picker-options{background:#1a1a1c!important;border-color:#333!important}
+.ql-toolbar .ql-pagebreak{width:auto!important;color:var(--gold);font-size:11px;font-family:var(--font-tech)}
+#editor-container{height:350px;background:#fff;color:#111;border-bottom-left-radius:4px;border-bottom-right-radius:4px;font-family:var(--font-main);font-size:14px;line-height:1.6}
+#editor-stats{font-size:11px;color:#888;display:flex;justify-content:space-between;margin-bottom:12px;font-family:var(--font-main)}
+#editor-stats.warn{color:var(--danger)}
+.page-break{display:block;border:2px dashed var(--gold);text-align:center;padding:10px;margin:20px 0;background:#fff9e6;color:var(--gold);font-weight:bold;font-family:var(--font-tech)}
 
-        .card h4 {
-            margin: 10px 0;
-            font-family: var(--font-tech);
-            font-size: 0.85rem;
-            color: #fff;
-            text-align: center;
-        }
+/* Reader */
+#viewer{display:none;position:fixed;inset:0;background:#000;z-index:5000;overflow:hidden;
+  --page-bg:#14141a;--page-fg:#e8e6df;--page-line:#2a2a33;--page-foot:#101015;--reader-size:16px;--reader-font:var(--font-main)}
+#viewer[data-theme="sepia"]{--page-bg:#f4ecd8;--page-fg:#433422;--page-line:#dccfae;--page-foot:#ebe0c6}
+#viewer[data-theme="paper"]{--page-bg:#ffffff;--page-fg:#111;--page-line:#eee;--page-foot:#fafafa}
+#viewer[data-font="serif"]{--reader-font:'Lora',Georgia,serif}
+#read-progress{position:absolute;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,.08);z-index:1002}
+#read-progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold-2));transition:width .4s var(--ease);box-shadow:0 0 10px var(--gold)}
+.viewer-nav{height:60px;padding:0 14px 0 20px;background:#000;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1001;gap:10px}
+.viewer-title{display:flex;flex-direction:column;min-width:0}
+.viewer-title small{color:var(--gold);font-family:var(--font-tech);font-size:10px;letter-spacing:1px}
+.viewer-title strong{color:#ddd;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:34vw}
+.viewer-actions{display:flex;align-items:center;gap:8px;margin-left:auto;overflow-x:auto;scrollbar-width:none;padding:4px 2px}
+.viewer-actions::-webkit-scrollbar{display:none}
+.viewer-actions .icon-btn{width:34px;height:34px}
+.viewer-actions .btn{padding:8px 11px}
+#viewer.preview .rd-social{opacity:.35;pointer-events:none}
+#book-viewport{position:relative;width:100vw;height:calc(100vh - 60px - 58px);height:calc(100dvh - 60px - 58px);display:flex;justify-content:center;align-items:center;background:radial-gradient(circle,#101012,#050506);cursor:pointer;touch-action:pan-y}
+#flipbook{position:relative;width:700px;height:calc(100% - 24px);max-height:900px;max-width:95vw}
+.page{display:none;position:absolute;width:100%;height:100%;background:var(--page-bg);color:var(--page-fg);overflow:hidden;border-radius:8px;box-shadow:0 0 30px rgba(0,0,0,.8),0 0 0 1px rgba(212,175,55,.12)}
+.page.active{display:flex;flex-direction:column}
+.page.flip-next{animation:flipNext .55s var(--ease);transform-origin:left center}
+.page.flip-prev{animation:flipPrev .55s var(--ease);transform-origin:right center}
+@keyframes flipNext{from{transform:perspective(1800px) rotateY(-22deg) translateX(50px);opacity:0}}
+@keyframes flipPrev{from{transform:perspective(1800px) rotateY(22deg) translateX(-50px);opacity:0}}
+.page-cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px}
+.cover-overlay{position:absolute;bottom:0;left:0;right:0;padding:20px;background:linear-gradient(to top,rgba(0,0,0,.9),transparent);text-align:center;color:var(--gold);font-family:var(--font-tech);font-size:11px;letter-spacing:2px}
+.page-content{padding:40px;flex:1;overflow-y:auto;box-sizing:border-box;font-family:var(--reader-font);line-height:1.75;font-size:var(--reader-size);user-select:text;-webkit-user-select:text;cursor:text;color:var(--page-fg)}
+.page-content h1,.page-content h2{font-family:var(--font-tech);color:var(--gold);line-height:1.3}
+.page-content blockquote{border-left:3px solid var(--gold);margin:1em 0;padding:.4em 1em;background:rgba(212,175,55,.08);font-style:italic;border-radius:0 8px 8px 0}
+.page-content img{max-width:100%;height:auto;border-radius:6px}
+.page-content a{color:var(--gold);text-decoration:underline}
+.page-content.ql-editor{height:auto}
+.page-footer{padding:10px 20px;border-top:1px solid var(--page-line);display:flex;justify-content:space-between;font-size:12px;color:#888;font-family:var(--font-tech);background:var(--page-foot)}
+.nav-hint{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);color:var(--gold);font-family:var(--font-tech);font-size:10px;letter-spacing:2px;opacity:.7;pointer-events:none;z-index:1000;transition:opacity 1s;white-space:nowrap}
+.nav-hint.hide{opacity:0}
+.edge-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:1000;width:44px;height:44px;font-size:20px}
+.edge-btn.l{left:12px}.edge-btn.r{right:12px}
+@media(max-width:820px){.edge-btn{display:none}}
+.page.hard{background:#0e0e0e!important;color:var(--gold)!important;border:8px double var(--gold);flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.page.hard.active{display:flex}
+.viewer-foot{height:58px;background:#000;border-top:1px solid #222;display:flex;align-items:center;gap:14px;padding:0 20px;position:relative;z-index:1001}
+.viewer-foot input[type=range]{flex:1;accent-color:var(--gold);cursor:pointer}
+#pg-counter{font-family:var(--font-tech);font-size:11px;color:var(--gold);min-width:84px;text-align:right}
+.pop{position:absolute;top:66px;right:14px;background:#111;border:var(--border);border-radius:12px;padding:16px;z-index:1100;width:260px;display:none;box-shadow:0 20px 50px rgba(0,0,0,.7)}
+.pop.open{display:block;animation:pop .25s var(--ease)}
+.pop label{font-size:10px;font-family:var(--font-tech);color:var(--gold);letter-spacing:1px;display:block;margin:10px 0 6px}
+.pop label:first-child{margin-top:0}
+.seg{display:flex;gap:6px}.seg button{flex:1;padding:8px;border-radius:6px;border:1px solid #333;background:#000;color:#ccc;cursor:pointer;font-size:12px}
+.seg button.on{border-color:var(--gold);color:var(--gold)}
+.seg .t-night{background:#14141a}.seg .t-sepia{background:#f4ecd8;color:#433422}.seg .t-paper{background:#fff;color:#111}
+.pop input[type=range]{width:100%;accent-color:var(--gold)}
+#drawer{position:absolute;top:60px;right:0;bottom:0;width:min(360px,100%);background:#0c0c0e;border-left:var(--border);z-index:1100;transform:translateX(105%);transition:transform .4s var(--ease);display:flex;flex-direction:column}
+#drawer.open{transform:none}
+.drawer-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #222}
+.tabs{display:flex;gap:6px}.tabs button{background:none;border:none;color:#999;font-family:var(--font-tech);font-size:11px;letter-spacing:1px;padding:8px 10px;cursor:pointer;border-bottom:2px solid transparent}
+.tabs button.on{color:var(--gold);border-color:var(--gold)}
+.drawer-body{flex:1;overflow-y:auto;padding:14px}
+#toc-list{list-style:none;margin:0;padding:0}
+#toc-list li{padding:10px 12px;border-radius:8px;cursor:pointer;font-size:13px;display:flex;justify-content:space-between;gap:10px;color:#ccc;border:1px solid transparent}
+#toc-list li:hover{background:rgba(212,175,55,.1);border-color:rgba(212,175,55,.3)}
+#toc-list li.cur{color:var(--gold);border-color:var(--gold)}
+#toc-list li span{color:#777;font-family:var(--font-tech);font-size:10px;flex:none}
+#notes-area{width:100%;height:60%;min-height:200px;resize:vertical;color:#eee}
+.notes-actions{display:flex;gap:8px;align-items:center}
+#notes-status{color:#777;font-size:11px;margin-left:auto}
+.sel-tip{position:fixed;z-index:6500;background:#111;border:1px solid var(--gold);border-radius:999px;padding:5px;display:none;gap:4px;box-shadow:0 10px 30px rgba(0,0,0,.6);transform:translateX(-50%)}
+.sel-tip.open{display:flex;animation:pop .2s}
+.sel-tip .icon-btn{width:34px;height:34px}
 
-        .btn { 
-            background: transparent; 
-            border: 1px solid var(--gold); 
-            color: var(--gold); 
-            padding: 10px 15px; 
-            cursor: pointer; 
-            text-transform: uppercase; 
-            font-size: 10px; 
-            font-weight: 700; 
-            font-family: var(--font-tech);
-            letter-spacing: 1px;
-            transition: 0.3s; 
-            border-radius: 4px;
-        }
+/* Toasts & hearts */
+#toasts{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:9000;display:flex;flex-direction:column;gap:10px;align-items:center;width:min(92vw,420px);pointer-events:none}
+.toast{pointer-events:auto;background:#141414;border:1px solid var(--gold);color:#eee;padding:12px 16px;border-radius:12px;font-size:13px;box-shadow:0 12px 40px rgba(0,0,0,.6);display:flex;gap:12px;align-items:center;animation:pop .35s var(--ease);width:100%}
+.toast.error{border-color:var(--danger)}.toast.warn{border-color:#e6a23c}
+.toast button{margin-left:auto;background:none;border:1px solid var(--gold);color:var(--gold);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px}
+.heart-fly{position:fixed;pointer-events:none;z-index:9500;font-size:18px;animation:fly 1s ease-out forwards;color:#ff6b81}
+@keyframes fly{to{transform:translate(var(--dx),-120px) scale(1.6);opacity:0}}
 
-        .btn:hover { background: var(--gold); color: #000; }
-
-        .btn-danger {
-            border-color: #ff4d4d !important;
-            color: #ff4d4d !important;
-        }
-        .btn-danger:hover {
-            background: #ff4d4d !important;
-            color: #fff !important;
-        }
-
-        #admin-panel { 
-            display: none; 
-            position: fixed; 
-            inset: 0; 
-            background: rgba(0,0,0,0.95); 
-            z-index: 2000; 
-            align-items: center; 
-            justify-content: center;
-            padding: 15px;
-        }
-
-        .modal { 
-            background: #111; 
-            border: var(--border); 
-            width: 100%; 
-            max-width: 850px; 
-            padding: 25px; 
-            border-radius: 12px; 
-            max-height: 90vh; 
-            overflow-y: auto; 
-        }
-
-        input[type="text"] { 
-            width: 100%; padding: 12px; margin-bottom: 15px; 
-            background: #000; border: 1px solid #333; color: var(--gold); 
-            border-radius: 4px;
-            font-family: var(--font-main);
-        }
-
-        /* Editor Modal Layout */
-        .editor-wrapper {
-            margin-bottom: 15px;
-        }
-
-        .ql-toolbar.ql-snow {
-            background: #1a1a1c;
-            border-color: #333 !important;
-            border-top-left-radius: 4px;
-            border-top-right-radius: 4px;
-        }
-        .ql-stroke { stroke: var(--gold) !important; }
-        .ql-fill { fill: var(--gold) !important; }
-        .ql-picker { color: var(--gold) !important; }
-
-        #editor-container { 
-            height: 350px; 
-            background: #ffffff; 
-            color: #111; 
-            border-bottom-left-radius: 4px; 
-            border-bottom-right-radius: 4px; 
-            font-family: var(--font-main);
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .page-break { 
-            display: block; 
-            border: 2px dashed var(--gold); 
-            text-align: center; 
-            padding: 10px; 
-            margin: 20px 0; 
-            background: #fff9e6; 
-            color: var(--gold); 
-            font-weight: bold; 
-            font-family: var(--font-tech);
-        }
-
-        /* Reader Overlay */
-        #viewer { 
-            display: none; 
-            position: fixed; 
-            inset: 0; 
-            background: #000; 
-            z-index: 5000; 
-            overflow: hidden;
-        }
-
-        .viewer-nav { 
-            height: 60px;
-            padding: 0 20px; 
-            background: #000; 
-            border-bottom: 1px solid #222; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            position: relative;
-            z-index: 1001;
-        }
-
-        .viewer-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-left: auto;
-        }
-
-        #book-viewport { 
-            position: relative;
-            width: 100vw;
-            height: calc(100vh - 60px); 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            background: #080808;
-            cursor: pointer;
-        }
-        
-        #flipbook { 
-            position: relative;
-            width: 700px;
-            height: 85vh;
-            max-width: 95vw;
-            perspective: 2000px;
-        }
-
-        .page { 
-            display: none;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: #ffffff; 
-            color: #111; 
-            overflow: hidden; 
-            border-radius: 8px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
-            user-select: none;
-        }
-
-        .page.active {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .page-cover {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-
-        .cover-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 20px;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-            text-align: center;
-            color: var(--gold);
-            font-family: var(--font-tech);
-            font-size: 11px;
-            letter-spacing: 2px;
-        }
-
-        .page-content { 
-            padding: 40px; 
-            flex: 1;
-            overflow-y: auto; 
-            box-sizing: border-box; 
-            font-family: var(--font-main);
-            line-height: 1.7;
-            font-size: 16px;
-        }
-
-        .page-footer {
-            padding: 10px 20px;
-            border-top: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: #888;
-            font-family: var(--font-tech);
-            background: #fafafa;
-        }
-
-        .nav-hint {
-            position: absolute;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: var(--gold);
-            font-family: var(--font-tech);
-            font-size: 10px;
-            letter-spacing: 2px;
-            opacity: 0.7;
-            pointer-events: none;
-            z-index: 1000;
-        }
-
-        .page.hard { 
-            background: #0e0e0e !important; 
-            color: var(--gold) !important; 
-            border: 8px double var(--gold); 
-            display: none;
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            text-align: center;
-        }
-
-        @media (max-width: 600px) {
-            .grid { grid-template-columns: 1fr 1fr; gap: 15px; }
-            .navbar { padding: 0.8rem 15px; }
-            .logo { font-size: 0.8rem; }
-            .modal { padding: 15px; }
-            .page-content { padding: 20px; font-size: 14px; }
-        }
-    </style>
+@media(max-width:820px){.hero{grid-template-columns:1fr}.toolbar{top:56px}}
+@media(max-width:600px){
+  .grid{grid-template-columns:1fr 1fr;gap:15px}.grid.list{grid-template-columns:1fr}
+  .navbar{padding:.8rem 15px}.logo{font-size:.8rem;letter-spacing:2px}.modal{padding:15px}
+  .page-content{padding:20px}.viewer-title strong{max-width:22vw}.card{padding:10px}.card h4{font-size:.72rem}
+  .share-grid{grid-template-columns:repeat(3,1fr)}.verse-card{padding:20px}
+}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@media print{#dust,.navbar,.toolbar{display:none}}
+</style>
 </head>
 <body>
+<canvas id="dust" aria-hidden="true"></canvas>
 
 <nav class="navbar">
-    <div class="logo">BIBLE STUDY</div>
-    <div id="auth-zone">
-        <button class="btn" id="login-btn" onclick="handleAuth()">Access</button>
-        <div class="admin-only" style="display:none;">
-            <button class="btn" onclick="openCreator()">+ NEW</button>
-            <button class="btn btn-danger" onclick="logout()">EXIT</button>
-        </div>
+  <div class="logo"><svg class="ico" viewBox="0 0 24 24"><path d="M10 2h4v7h7v4h-7v9h-4v-9H3V9h7z"/></svg>BIBLE STUDY</div>
+  <div id="auth-zone">
+    <button class="btn" id="login-btn" onclick="handleAuth()">Access</button>
+    <div class="admin-only">
+      <button class="btn" onclick="openCreator()"><span data-ico="plus"></span> NEW</button>
+      <button class="btn btn-danger" onclick="logout()">EXIT</button>
     </div>
+  </div>
 </nav>
 
-<div class="container">
-    <div id="gallery" class="grid"></div>
-</div>
+<header class="hero">
+  <section class="verse-card">
+    <div class="eyebrow">VERSE OF THE DAY</div>
+    <div class="verse-text" id="verse-text"></div>
+    <div class="verse-ref" id="verse-ref"></div>
+    <div class="verse-actions">
+      <button class="icon-btn" id="verse-share" title="Share verse" data-ico="share"></button>
+      <button class="icon-btn" id="verse-copy" title="Copy verse" data-ico="copy"></button>
+      <button class="icon-btn" id="verse-card" title="Save as image" data-ico="image"></button>
+    </div>
+  </section>
+  <section class="stats-card">
+    <div><div class="eyebrow" id="greet-eyebrow">WELCOME</div><h2 class="greet" id="greet">Grow in the Word</h2></div>
+    <div class="stats">
+      <div class="stat"><b id="st-count">0</b><span>Studies</span></div>
+      <div class="stat"><b id="st-likes">0</b><span>Likes</span></div>
+      <div class="stat"><b id="st-views">0</b><span>Views</span></div>
+    </div>
+  </section>
+</header>
+
+<main class="container">
+  <div class="toolbar">
+    <div class="search"><span data-ico="search"></span><input type="text" id="search" placeholder="Search studies…" autocomplete="off" aria-label="Search"><kbd>/</kbd></div>
+    <div class="chips" id="chips">
+      <button class="chip on" data-f="all">All</button>
+      <button class="chip" data-f="saved">Saved</button>
+      <button class="chip" data-f="liked">Liked</button>
+      <button class="chip" data-f="progress">Continue</button>
+    </div>
+    <select id="sort" aria-label="Sort">
+      <option value="new">Newest</option><option value="likes">Most liked</option><option value="views">Most viewed</option><option value="az">A – Z</option>
+    </select>
+    <button class="icon-btn" id="view-toggle" title="Toggle view" data-ico="list"></button>
+  </div>
+  <div id="gallery" class="grid"></div>
+</main>
 
 <div id="admin-panel">
-    <div class="modal">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3 style="color:var(--gold); font-family:var(--font-tech); margin:0;" id="admin-modal-title">ARCHIVE COMPILER</h3>
-            <button class="btn btn-danger" onclick="closeAdmin()">EXIT</button>
-        </div>
-        
-        <input type="hidden" id="edit-id">
-        <input type="text" id="theme" placeholder="DOCUMENT TITLE">
-        
-        <div style="background:#000; padding:12px; border:1px solid #333; margin-bottom:12px; border-radius:4px;">
-            <label style="color:var(--gold); font-size:9px; font-family:var(--font-tech);">COVER IMAGE (PORTRAIT)</label><br>
-            <input type="file" id="cover-upload" accept="image/*" style="margin-top:8px; font-size:11px;">
-        </div>
-        
-        <div class="editor-wrapper">
-            <div id="editor-container"></div>
-        </div>
-        
-        <input type="text" id="reference" placeholder="REFERENCE URL" style="margin-top:12px;">
-        
-        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:15px;">
-            <button class="btn" id="save-btn" onclick="processAndSave()">PUBLISH</button>
-            <button class="btn btn-danger" onclick="closeAdmin()">CANCEL</button>
-        </div>
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px">
+      <h3 style="color:var(--gold);font-family:var(--font-tech);margin:0" id="admin-modal-title">ARCHIVE COMPILER</h3>
+      <button class="btn btn-danger" onclick="closeAdmin()">EXIT</button>
     </div>
+    <input type="hidden" id="edit-id">
+    <input type="text" id="theme" placeholder="DOCUMENT TITLE">
+    <div class="cover-box">
+      <img id="cover-preview" alt="Cover preview">
+      <div>
+        <label>COVER IMAGE (PORTRAIT)</label><br>
+        <input type="file" id="cover-upload" accept="image/*" style="margin-top:8px;font-size:11px">
+        <button class="btn btn-danger" id="cover-remove" type="button" style="display:none;margin-top:8px;padding:5px 9px">REMOVE</button>
+      </div>
+    </div>
+    <div class="editor-wrapper"><div id="editor-container"></div></div>
+    <div id="editor-stats"><span id="es-words">0 words</span><span id="es-size">0 KB / 1 MB</span></div>
+    <input type="text" id="reference" placeholder="REFERENCE URL">
+    <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:15px;flex-wrap:wrap">
+      <button class="btn" id="preview-btn" type="button"><span data-ico="eye"></span> PREVIEW</button>
+      <button class="btn btn-solid" id="save-btn" onclick="processAndSave()">PUBLISH</button>
+      <button class="btn btn-danger" onclick="closeAdmin()">CANCEL</button>
+    </div>
+  </div>
 </div>
 
-<div id="viewer">
-    <div class="viewer-nav">
-        <span style="color:var(--gold); font-family:var(--font-tech); font-size:11px; letter-spacing:1px;">RECORD_VIEWER</span>
-        <div class="viewer-actions">
-            <button class="btn" onclick="generatePDF(event)">EXPORT</button>
-            <button class="btn btn-danger" onclick="closeViewer(event)">EXIT</button>
-        </div>
+<div id="viewer" data-theme="night" data-font="sans" role="dialog" aria-modal="true" aria-label="Reader">
+  <div id="read-progress"><i></i></div>
+  <div class="viewer-nav">
+    <div class="viewer-title"><small>RECORD_VIEWER</small><strong id="viewer-title"></strong></div>
+    <div class="viewer-actions">
+      <span class="rd-social" style="display:flex;gap:8px">
+        <button class="icon-btn" id="rd-like" title="Like (L)" data-ico="heart"></button>
+        <button class="icon-btn" id="rd-save" title="Save" data-ico="bookmark"></button>
+        <button class="icon-btn" id="rd-share" title="Share" data-ico="share"></button>
+      </span>
+      <button class="icon-btn" id="rd-listen" title="Read aloud" data-ico="volume"></button>
+      <button class="icon-btn" id="rd-toc" title="Contents & notes" data-ico="book"></button>
+      <button class="icon-btn" id="rd-aa" title="Reading settings">Aa</button>
+      <a class="icon-btn" id="rd-ref" title="Open reference" target="_blank" rel="noopener noreferrer" style="display:none" data-ico="ext"></a>
+      <button class="icon-btn" id="rd-full" title="Fullscreen (F)" data-ico="max"></button>
+      <button class="btn" onclick="generatePDF(event)">EXPORT</button>
+      <button class="btn btn-danger" onclick="closeViewer(event)">EXIT</button>
     </div>
-    <div id="book-viewport" onclick="nextPageLoop()">
-        <div id="flipbook"></div>
-        <div class="nav-hint">TAP ANYWHERE TO READ</div>
+  </div>
+  <div id="book-viewport">
+    <button class="icon-btn edge-btn l" id="edge-l" title="Previous" data-ico="left"></button>
+    <button class="icon-btn edge-btn r" id="edge-r" title="Next" data-ico="right"></button>
+    <div id="flipbook"></div>
+    <div class="nav-hint" id="nav-hint">TAP RIGHT TO READ · LEFT TO GO BACK</div>
+  </div>
+  <div class="viewer-foot"><input type="range" id="pg-slider" min="0" max="0" value="0" aria-label="Page"><span id="pg-counter"></span></div>
+
+  <div class="pop" id="reader-settings">
+    <label>TEXT SIZE</label><input type="range" id="set-size" min="13" max="26" step="1">
+    <label>THEME</label>
+    <div class="seg" id="set-theme"><button data-v="night" class="t-night">Night</button><button data-v="sepia" class="t-sepia">Sepia</button><button data-v="paper" class="t-paper">Paper</button></div>
+    <label>FONT</label>
+    <div class="seg" id="set-font"><button data-v="sans">Sans</button><button data-v="serif">Serif</button></div>
+  </div>
+
+  <aside id="drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <div class="tabs"><button class="on" data-tab="toc">CONTENTS</button><button data-tab="notes">MY NOTES</button></div>
+      <button class="icon-btn" id="drawer-close" data-ico="x"></button>
     </div>
+    <div class="drawer-body" id="tab-toc"><ol id="toc-list"></ol></div>
+    <div class="drawer-body" id="tab-notes" hidden>
+      <textarea class="field" id="notes-area" placeholder="Write your reflections, prayers and questions here. Saved privately on this device."></textarea>
+      <div class="notes-actions"><button class="btn" id="notes-copy">COPY</button><button class="btn btn-danger" id="notes-clear">CLEAR</button><span id="notes-status"></span></div>
+    </div>
+  </aside>
+  <div class="sel-tip" id="sel-tip">
+    <button class="icon-btn" data-sel="share" title="Share quote" data-ico="share"></button>
+    <button class="icon-btn" data-sel="copy" title="Copy" data-ico="copy"></button>
+    <button class="icon-btn" data-sel="card" title="Quote image" data-ico="image"></button>
+    <button class="icon-btn" data-sel="note" title="Add to notes" data-ico="file"></button>
+  </div>
 </div>
 
-<!-- Synchronous JS Dependencies with CDN fallbacks -->
+<div class="overlay" id="login-modal"><form class="sheet" id="login-form" autocomplete="on">
+  <h3>ADMIN ACCESS</h3><p>Sign in to create and manage studies.</p>
+  <input type="email" id="login-id" placeholder="ID (email)" autocomplete="username" required>
+  <input type="password" id="login-code" placeholder="CODE" autocomplete="current-password" required>
+  <div class="err" id="login-err"></div>
+  <div class="row-end"><button type="button" class="btn btn-danger" id="login-cancel">CANCEL</button><button class="btn btn-solid" id="login-go">ENTER</button></div>
+</form></div>
+
+<div class="overlay" id="confirm-modal"><div class="sheet">
+  <h3 id="cf-title">CONFIRM</h3><p id="cf-msg"></p>
+  <div class="row-end"><button class="btn" id="cf-no">CANCEL</button><button class="btn btn-danger" id="cf-yes">CONFIRM</button></div>
+</div></div>
+
+<div class="overlay" id="share-modal"><div class="sheet">
+  <div style="display:flex;justify-content:space-between;align-items:center"><h3>SHARE</h3><button class="icon-btn" id="share-close" data-ico="x"></button></div>
+  <p id="share-title"></p>
+  <div class="share-url"><input type="text" id="share-url" readonly><button class="btn" id="share-copy">COPY</button></div>
+  <div class="share-grid" id="share-grid"></div>
+</div></div>
+
+<div id="toasts" aria-live="polite"></div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
 
-<!-- Global Script execution before Module -->
 <script>
-    window.quillInstance = null;
+/* ---------- Shared helpers (classic script) ---------- */
+window.quillInstance = null;
 
-    function registerQuillPageBreak() {
-        if (typeof Quill !== "undefined" && !window.pageBreakRegistered) {
-            try {
-                var BlockEmbed = Quill.import('blots/block/embed');
-                class PageBreak extends BlockEmbed {
-                    static create() {
-                        let node = super.create();
-                        node.setAttribute('class', 'page-break');
-                        node.innerHTML = "--- PAGE BREAK ---";
-                        return node;
-                    }
-                }
-                PageBreak.blotName = 'pagebreak';
-                PageBreak.tagName = 'div';
-                Quill.register(PageBreak, true);
-                window.pageBreakRegistered = true;
-            } catch(e) {
-                console.warn("Blot registration skipped or already exists", e);
-            }
+const ICONS = {
+  heart:'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
+  bookmark:'<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',
+  share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>',
+  eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+  clock:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  search:'<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  grid:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>',
+  list:'<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>',
+  x:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>',
+  trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>',
+  volume:'<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>',
+  pause:'<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>',
+  max:'<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>',
+  left:'<polyline points="15 18 9 12 15 6"/>', right:'<polyline points="9 18 15 12 9 6"/>',
+  book:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+  file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+  plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  image:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
+  copy:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+  ext:'<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>'
+};
+function ico(n, s){ return '<svg class="ico" viewBox="0 0 24 24"'+(s?' style="width:'+s+'px;height:'+s+'px"':'')+'>'+(ICONS[n]||'')+'</svg>'; }
+function hydrateIcons(root){ (root||document).querySelectorAll('[data-ico]').forEach(function(el){ if(!el.dataset.done){ el.insertAdjacentHTML('afterbegin', ico(el.dataset.ico)); el.dataset.done=1; } }); }
+
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LS = {
+  get(k,d){ try{ const v=JSON.parse(localStorage.getItem(k)); return v==null?d:v; }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+
+function toast(msg, type, ms, action){
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type||'');
+  t.innerHTML = '<span>'+esc(msg)+'</span>';
+  if(action){ const b=document.createElement('button'); b.textContent=action.label; b.onclick=()=>{ action.fn(); t.remove(); }; t.appendChild(b); }
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>{ t.style.transition='.4s'; t.style.opacity=0; setTimeout(()=>t.remove(),400); }, ms||2600);
+}
+
+function confirmDialog(o){
+  return new Promise(res=>{
+    const m=document.getElementById('confirm-modal');
+    document.getElementById('cf-title').textContent=o.title||'CONFIRM';
+    document.getElementById('cf-msg').textContent=o.msg||'';
+    const yes=document.getElementById('cf-yes'), no=document.getElementById('cf-no');
+    yes.textContent=o.ok||'CONFIRM'; yes.className='btn '+(o.danger===false?'btn-solid':'btn-danger');
+    m.classList.add('open'); yes.focus();
+    const done=v=>{ m.classList.remove('open'); yes.onclick=no.onclick=null; res(v); };
+    yes.onclick=()=>done(true); no.onclick=()=>done(false);
+  });
+}
+
+function sanitizeHTML(html){
+  const d=new DOMParser().parseFromString('<div>'+(html||'')+'</div>','text/html'), root=d.body.firstChild;
+  root.querySelectorAll('script,style,iframe,object,embed,link,meta,form,base').forEach(n=>n.remove());
+  root.querySelectorAll('*').forEach(el=>{
+    [...el.attributes].forEach(a=>{
+      const n=a.name.toLowerCase();
+      if(n.startsWith('on') || ((n==='href'||n==='src'||n==='xlink:href') && /^\s*(javascript|vbscript):/i.test(a.value))) el.removeAttribute(a.name);
+    });
+    if(el.tagName==='A'){ el.setAttribute('target','_blank'); el.setAttribute('rel','noopener noreferrer'); }
+  });
+  return root.innerHTML;
+}
+function plainText(html){ const d=document.createElement('div'); d.innerHTML=sanitizeHTML(html); return (d.textContent||'').replace(/\s+/g,' ').trim(); }
+
+function placeholderCover(title){
+  const t=esc(String(title||'Bible Study').slice(0,26));
+  const svg="<svg xmlns='http://www.w3.org/2000/svg' width='300' height='420'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#1d1a0e'/><stop offset='1' stop-color='#050506'/></linearGradient></defs><rect width='300' height='420' fill='url(#g)'/><rect x='14' y='14' width='272' height='392' fill='none' stroke='#d4af37' stroke-opacity='.5' stroke-width='2'/><path d='M140 110h20v50h50v20h-50v90h-20v-90H90v-20h50z' fill='#d4af37' opacity='.85'/><text x='150' y='340' fill='#d4af37' font-family='Georgia,serif' font-size='17' text-anchor='middle'>"+t+"</text></svg>";
+  return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+}
+
+function readImage(file){
+  return new Promise((res,rej)=>{
+    const fr=new FileReader(); fr.onerror=rej;
+    fr.onload=e=>{ const img=new Image(); img.onerror=rej; img.onload=()=>res(img); img.src=e.target.result; };
+    fr.readAsDataURL(file);
+  });
+}
+async function processCover(file){ // centre-crop to 600x850 (no stretching)
+  const img=await readImage(file), W=600, H=850, c=document.createElement('canvas');
+  c.width=W; c.height=H; const x=c.getContext('2d');
+  const s=Math.max(W/img.width,H/img.height), w=img.width*s, h=img.height*s;
+  x.drawImage(img,(W-w)/2,(H-h)/2,w,h); return c.toDataURL('image/jpeg',.85);
+}
+async function compressImage(file,maxW,q){
+  const img=await readImage(file), s=Math.min(1,maxW/img.width), c=document.createElement('canvas');
+  c.width=Math.round(img.width*s); c.height=Math.round(img.height*s);
+  const x=c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height); x.drawImage(img,0,0,c.width,c.height);
+  return c.toDataURL('image/jpeg',q||.8);
+}
+
+function copyText(t){
+  if(navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(t);
+  return new Promise((res,rej)=>{ const a=document.createElement('textarea'); a.value=t; a.style.cssText='position:fixed;opacity:0'; document.body.appendChild(a); a.select(); try{ document.execCommand('copy'); res(); }catch(e){ rej(e); } a.remove(); });
+}
+
+/* Quote / verse image card */
+function makeQuoteCard(text, source){
+  const W=1080,H=1350,c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,'#1d1a0e'); g.addColorStop(1,'#050506'); x.fillStyle=g; x.fillRect(0,0,W,H);
+  x.strokeStyle='rgba(212,175,55,.6)'; x.lineWidth=4; x.strokeRect(50,50,W-100,H-100);
+  x.strokeStyle='rgba(212,175,55,.25)'; x.lineWidth=1.5; x.strokeRect(70,70,W-140,H-140);
+  x.fillStyle='#d4af37'; x.fillRect(W/2-8,130,16,80); x.fillRect(W/2-40,152,80,16);
+  x.textAlign='center'; x.fillStyle='#f3ecd2';
+  let size=text.length>260?40:text.length>140?50:60, lines;
+  for(;;){
+    x.font='italic '+size+'px Georgia, serif'; lines=[]; let line='';
+    text.split(/\s+/).forEach(w=>{ const t=line?line+' '+w:w; if(x.measureText(t).width>W-260 && line){ lines.push(line); line=w; } else line=t; });
+    lines.push(line);
+    if(lines.length*size*1.45<=H-640 || size<=24) break; size-=3;
+  }
+  const lh=size*1.45; let y=(H-lines.length*lh)/2+size*.3;
+  lines.forEach((l,i)=>x.fillText(l,W/2,y+i*lh));
+  x.fillStyle='#d4af37'; x.font='bold 30px Georgia, serif'; x.fillText(String(source||'').toUpperCase().slice(0,50),W/2,H-210);
+  x.font='22px sans-serif'; x.fillStyle='rgba(212,175,55,.7)'; x.fillText('BIBLE STUDY',W/2,H-140);
+  return c;
+}
+function downloadCard(text, source){
+  const c=makeQuoteCard(text,source);
+  c.toBlob(async b=>{
+    const f=new File([b],'quote.png',{type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[f]})){ try{ await navigator.share({files:[f],title:source||'Quote'}); return; }catch(e){ if(e.name==='AbortError') return; } }
+    const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='bible-study-quote.png'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+    toast('Quote image saved');
+  });
+}
+
+/* Ripple + gold dust background */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.btn'); if(!b) return; const r=b.getBoundingClientRect(), s=document.createElement('span'), d=Math.max(r.width,r.height);
+  s.className='ripple'; s.style.cssText='width:'+d+'px;height:'+d+'px;left:'+(e.clientX-r.left-d/2)+'px;top:'+(e.clientY-r.top-d/2)+'px';
+  b.appendChild(s); setTimeout(()=>s.remove(),600);
+});
+(function(){
+  const c=document.getElementById('dust'); if(!c || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const x=c.getContext('2d'); let w,h,p=[];
+  function size(){ w=c.width=innerWidth; h=c.height=innerHeight; }
+  size(); addEventListener('resize',size);
+  for(let i=0;i<46;i++) p.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.6+.4,s:Math.random()*.3+.08,a:Math.random()*.5+.15,d:Math.random()*6});
+  (function loop(t){
+    requestAnimationFrame(loop);
+    if(document.hidden || document.body.classList.contains('reading')) return;
+    x.clearRect(0,0,w,h);
+    p.forEach(o=>{ o.y-=o.s; o.x+=Math.sin(t/2000+o.d)*.2; if(o.y<-5){ o.y=h+5; o.x=Math.random()*w; }
+      x.beginPath(); x.arc(o.x,o.y,o.r,0,6.283); x.fillStyle='rgba(212,175,55,'+o.a+')'; x.fill(); });
+  })(0);
+})();
+
+/* ---------- Quill editor ---------- */
+function registerQuillPageBreak(){
+  if (typeof Quill !== "undefined" && !window.pageBreakRegistered) {
+    try {
+      var BlockEmbed = Quill.import('blots/block/embed');
+      class PageBreak extends BlockEmbed {
+        static create() { let node = super.create(); node.setAttribute('class','page-break'); node.innerHTML = "--- PAGE BREAK ---"; return node; }
+      }
+      PageBreak.blotName = 'pagebreak'; PageBreak.tagName = 'div';
+      Quill.register(PageBreak, true); window.pageBreakRegistered = true;
+    } catch(e){ console.warn("Blot registration skipped or already exists", e); }
+  }
+}
+
+function updateEditorStats(){
+  const q=window.quillInstance; if(!q) return;
+  const words=q.getText().trim().split(/\s+/).filter(Boolean).length;
+  const bytes=new Blob([q.root.innerHTML]).size + (window.tempCover||'').length;
+  const kb=Math.round(bytes/1024), el=document.getElementById('editor-stats');
+  document.getElementById('es-words').textContent=words+' words · ~'+Math.max(1,Math.ceil(words/200))+' min read';
+  document.getElementById('es-size').textContent=kb+' KB / 1024 KB';
+  el.classList.toggle('warn', bytes>900*1024);
+}
+let _draftT;
+function saveDraft(){
+  if($('#edit-id').val()) return; clearTimeout(_draftT);
+  _draftT=setTimeout(()=>{
+    const q=window.quillInstance; if(!q) return;
+    if(!q.getText().trim() && !$('#theme').val()) return;
+    LS.set('bs_draft',{theme:$('#theme').val(),content:q.root.innerHTML,reference:$('#reference').val(),cover:window.tempCover||''});
+  },700);
+}
+
+function initQuillEditor() {
+  if (typeof Quill === "undefined") { alert("Quill script blocked or taking time to load. Check internet connection."); return false; }
+  registerQuillPageBreak();
+  $(".editor-wrapper").html('<div id="editor-container"></div>');
+  window.quillInstance = new Quill('#editor-container', {
+    theme: 'snow',
+    placeholder: 'Write your study… use PAGE to split into pages',
+    modules: { toolbar: {
+      container: [
+        [{ 'header': [1, 2, false] }],
+        ['bold', 'italic', 'underline'],
+        [{ 'color': [] }, { 'align': [] }],
+        ['blockquote', 'link'],
+        ['image'],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+        ['pagebreak'],
+        ['clean']
+      ],
+      handlers: {
+        'pagebreak': function() {
+          const range = this.quill.getSelection(true);
+          if (range) { this.quill.insertEmbed(range.index, 'pagebreak', true, 'user'); this.quill.setSelection(range.index + 1); }
+        },
+        'image': function() {
+          const inp=document.createElement('input'); inp.type='file'; inp.accept='image/*';
+          inp.onchange=async()=>{
+            const f=inp.files[0]; if(!f) return;
+            try{ const url=await compressImage(f,1000,.8), q=window.quillInstance, r=q.getSelection(true); q.insertEmbed(r.index,'image',url,'user'); q.setSelection(r.index+1); }
+            catch(e){ toast('Could not add image','error'); }
+          };
+          inp.click();
         }
-    }
-
-    function initQuillEditor() {
-        if (typeof Quill === "undefined") {
-            alert("Quill script blocked or taking time to load. Check internet connection.");
-            return false;
-        }
-
-        registerQuillPageBreak();
-
-        // Reset target container DOM
-        $(".editor-wrapper").html('<div id="editor-container"></div>');
-
-        window.quillInstance = new Quill('#editor-container', { 
-            theme: 'snow', 
-            modules: { 
-                toolbar: {
-                    container: [
-                        [{ 'header': [1, 2, false] }],
-                        ['bold', 'italic', 'underline'], 
-                        ['image'], 
-                        [{ 'list': 'bullet' }], 
-                        ['pagebreak'], 
-                        ['clean']
-                    ],
-                    handlers: { 
-                        'pagebreak': function() {
-                            const range = this.quill.getSelection();
-                            if (range) { 
-                                this.quill.insertEmbed(range.index, 'pagebreak', true); 
-                                this.quill.setSelection(range.index + 1); 
-                            }
-                        }
-                    }
-                }
-            }
-        });
-        $('.ql-pagebreak').html('<b>PAGE</b>');
-        return true;
-    }
+      }
+    } }
+  });
+  $('.ql-pagebreak').html('<b>PAGE</b>');
+  window.quillInstance.on('text-change',()=>{ updateEditorStats(); saveDraft(); });
+  updateEditorStats();
+  return true;
+}
 </script>
 
-<!-- Firebase Application Module -->
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+hydrateIcons();
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyBKxdIxwLrAuQ1DnlrP57KXz39VYBbn2Ns",
-        authDomain: "word-5592c.firebaseapp.com",
-        projectId: "word-5592c",
-        storageBucket: "word-5592c.firebasestorage.app",
-        messagingSenderId: "352185501602",
-        appId: "1:352185501602:web:1372f15784d0ade32994fb",
-        measurementId: "G-0QNMZ6G4ZN"
-    };
+let initializeApp,getFirestore,collection,addDoc,getDocs,updateDoc,deleteDoc,doc,query,orderBy,increment,getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut;
+try {
+  const [a,f,u] = await Promise.all([
+    import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"),
+    import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"),
+    import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js")
+  ]);
+  ({initializeApp} = a);
+  ({getFirestore,collection,addDoc,getDocs,updateDoc,deleteDoc,doc,query,orderBy,increment} = f);
+  ({getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut} = u);
+} catch(e) {
+  console.error(e);
+  $('#gallery').html('<div class="empty">'+ico('x')+'<h3>Could not load</h3><p>Check your internet connection and refresh.</p></div>');
+  throw e;
+}
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
+const firebaseConfig = {
+  apiKey: "AIzaSyBKxdIxwLrAuQ1DnlrP57KXz39VYBbn2Ns",
+  authDomain: "word-5592c.firebaseapp.com",
+  projectId: "word-5592c",
+  storageBucket: "word-5592c.firebasestorage.app",
+  messagingSenderId: "352185501602",
+  appId: "1:352185501602:web:1372f15784d0ade32994fb",
+  measurementId: "G-0QNMZ6G4ZN"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-    let currentPage = 0;
-    let totalPages = 0;
-    
-    window.bookletStore = {};
+window.bookletStore = {};
+const store = window.bookletStore;
+const textCache = {};
+const baseUrl = () => location.href.split('#')[0];
+const linkFor = id => baseUrl() + '#read=' + id;
+const readMins = d => Math.max(1, Math.ceil((textOf(d).split(' ').filter(Boolean).length) / 200));
+function textOf(d){ return d._id && textCache[d._id] != null ? textCache[d._id] : (textCache[d._id] = plainText(d.content)); }
+const fmt = n => { n = Math.max(0, n||0); return n >= 1000 ? (n/1000).toFixed(n>=10000?0:1)+'k' : String(n); };
 
-    window.handleAuth = async () => {
-        const e = prompt("ID:"), p = prompt("CODE:");
-        if(e && p) {
-            try { 
-                await signInWithEmailAndPassword(auth, e, p); 
-            } catch(err) { 
-                alert("Access Denied: " + err.message); 
-            }
-        }
-    };
+/* ---------- Verse of the day ---------- */
+const VERSES = [
+  ["For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.","John 3:16"],
+  ["Thy word is a lamp unto my feet, and a light unto my path.","Psalm 119:105"],
+  ["Trust in the LORD with all thine heart; and lean not unto thine own understanding.","Proverbs 3:5"],
+  ["I can do all things through Christ which strengtheneth me.","Philippians 4:13"],
+  ["Fear thou not; for I am with thee: be not dismayed; for I am thy God: I will strengthen thee; yea, I will help thee.","Isaiah 41:10"],
+  ["And we know that all things work together for good to them that love God, to them who are the called according to his purpose.","Romans 8:28"],
+  ["Be strong and of a good courage; be not afraid, neither be thou dismayed: for the LORD thy God is with thee whithersoever thou goest.","Joshua 1:9"],
+  ["The LORD is my shepherd; I shall not want.","Psalm 23:1"],
+  ["Come unto me, all ye that labour and are heavy laden, and I will give you rest.","Matthew 11:28"],
+  ["All scripture is given by inspiration of God, and is profitable for doctrine, for reproof, for correction, for instruction in righteousness.","2 Timothy 3:16"],
+  ["God is our refuge and strength, a very present help in trouble.","Psalm 46:1"],
+  ["For I know the thoughts that I think toward you, saith the LORD, thoughts of peace, and not of evil, to give you an expected end.","Jeremiah 29:11"]
+];
+const dayN = Math.floor((Date.now() - new Date(new Date().getFullYear(),0,0)) / 864e5);
+const V = VERSES[dayN % VERSES.length];
+$('#verse-text').text('“' + V[0] + '”'); $('#verse-ref').text('— ' + V[1] + ' (KJV)');
+const hr = new Date().getHours();
+$('#greet-eyebrow').text((hr < 12 ? 'GOOD MORNING' : hr < 18 ? 'GOOD AFTERNOON' : 'GOOD EVENING'));
+$('#greet').text('Grow in the Word today');
+$('#verse-share').on('click', () => shareItem({ title:'Verse of the Day', text:'“'+V[0]+'” — '+V[1], url:baseUrl(), quote:V[0], source:V[1] }));
+$('#verse-copy').on('click', () => copyText('“'+V[0]+'” — '+V[1]).then(() => toast('Verse copied')));
+$('#verse-card').on('click', () => downloadCard(V[0], V[1]));
 
-    window.logout = () => signOut(auth).then(() => location.reload());
+/* ---------- Local user state ---------- */
+const getSet = k => new Set(LS.get(k, []));
+const isLiked = id => getSet('bs_liked').has(id);
+const isSaved = id => getSet('bs_saved').has(id);
+const getProg = id => (LS.get('bs_progress', {}))[id];
+function setProg(id, page, total){ const p = LS.get('bs_progress', {}); p[id] = { page, total, t: Date.now() }; LS.set('bs_progress', p); }
 
-    window.openCreator = () => {
-        $("#admin-modal-title").text("ARCHIVE COMPILER");
-        $("#save-btn").text("PUBLISH");
-        $("#edit-id").val(""); 
-        $("#theme, #reference, #cover-upload").val("");
-        window.tempCover = "";
-        
-        // Modal displayed prior to initializing Quill so CSS measurements are calculated properly
-        $("#admin-panel").css('display', 'flex').hide().fadeIn(200, () => {
-            if (initQuillEditor() && window.quillInstance) {
-                window.quillInstance.setText('');
-            }
-        });
-    };
+/* ---------- Auth ---------- */
+window.handleAuth = () => { $('#login-err').text(''); $('#login-modal').addClass('open'); setTimeout(() => $('#login-id').trigger('focus'), 50); };
+$('#login-cancel').on('click', () => $('#login-modal').removeClass('open'));
+$('#login-form').on('submit', async e => {
+  e.preventDefault();
+  const id = $('#login-id').val().trim(), code = $('#login-code').val();
+  if (!id || !code) return;
+  $('#login-go').prop('disabled', true).text('...');
+  try { await signInWithEmailAndPassword(auth, id, code); $('#login-modal').removeClass('open'); $('#login-code').val(''); toast('Welcome back'); }
+  catch (err) { $('#login-err').text('Access Denied: ' + err.message.replace('Firebase: ', '')); }
+  $('#login-go').prop('disabled', false).text('ENTER');
+});
+window.logout = () => signOut(auth).then(() => location.reload());
 
-    window.editEntry = (id, event) => {
-        if(event) event.stopPropagation();
-        const data = window.bookletStore[id];
-        if(!data) return alert("Record unavailable for editing.");
+/* ---------- Gallery ---------- */
+const state = { q:'', f:'all', sort:'new', view: LS.get('bs_view', 'grid') };
+const gallery = document.getElementById('gallery');
 
-        $("#admin-modal-title").text("EDIT ARCHIVE RECORD");
-        $("#save-btn").text("UPDATE");
-        $("#edit-id").val(id); 
-        $("#theme").val(data.theme || ""); 
-        $("#reference").val(data.reference || "");
-        window.tempCover = data.cover || "";
+function visibleItems(){
+  let items = Object.entries(store).map(([id, d]) => ({ id, d }));
+  const q = state.q.toLowerCase();
+  const liked = getSet('bs_liked'), saved = getSet('bs_saved'), prog = LS.get('bs_progress', {});
+  items = items.filter(({ id, d }) => {
+    if (q && !((d.theme || '').toLowerCase().includes(q) || textOf(d).toLowerCase().includes(q))) return false;
+    if (state.f === 'saved') return saved.has(id);
+    if (state.f === 'liked') return liked.has(id);
+    if (state.f === 'progress') return prog[id] && prog[id].page > 0 && prog[id].page < prog[id].total - 1;
+    return true;
+  });
+  const s = state.sort;
+  items.sort((a, b) =>
+    s === 'likes' ? (b.d.likes||0) - (a.d.likes||0) :
+    s === 'views' ? (b.d.views||0) - (a.d.views||0) :
+    s === 'az' ? (a.d.theme||'').localeCompare(b.d.theme||'') :
+    (b.d.updated||0) - (a.d.updated||0));
+  return items;
+}
 
-        $("#admin-panel").css('display', 'flex').hide().fadeIn(200, () => {
-            if (initQuillEditor() && window.quillInstance) {
-                window.quillInstance.clipboard.dangerouslyPasteHTML(data.content || "");
-            }
-        });
-    };
+function cardHTML(id, d, i){
+  const liked = isLiked(id), saved = isSaved(id), pr = getProg(id);
+  const pct = pr && pr.total > 1 ? Math.round(pr.page / (pr.total - 1) * 100) : 0;
+  return `
+  <article class="card" data-id="${esc(id)}" style="--i:${Math.min(i, 14)}" tabindex="0" role="button" aria-label="Open ${esc(d.theme || 'Untitled')}">
+    <div class="card-media">
+      <img loading="lazy" alt="" src="${esc(d.cover || placeholderCover(d.theme))}">
+      <span class="badge">${ico('clock', 11)} ${readMins(d)} MIN</span>
+      <button class="icon-btn save ${saved ? 'on' : ''}" data-act="save" title="Save" aria-pressed="${saved}">${ico('bookmark', 15)}</button>
+      ${pct > 0 ? `<div class="card-progress"><i style="width:${pct}%"></i></div>` : ''}
+    </div>
+    <h4>${esc(d.theme || 'Untitled')}</h4>
+    <div class="card-meta">
+      <button class="meta-btn like ${liked ? 'liked' : ''}" data-act="like" data-like-id="${esc(id)}" title="Like">${ico('heart', 15)}<b>${fmt(d.likes)}</b></button>
+      <span class="meta-btn" style="pointer-events:none">${ico('eye', 15)}${fmt(d.views)}</span>
+      <button class="meta-btn" data-act="share" title="Share">${ico('share', 15)}</button>
+    </div>
+    <div class="admin-only card-admin">
+      <button class="btn" data-act="edit">${ico('edit', 12)} EDIT</button>
+      <button class="btn btn-danger" data-act="del">${ico('trash', 12)} DEL</button>
+    </div>
+  </article>`;
+}
 
-    window.closeAdmin = () => {
-        $("#admin-panel").fadeOut();
-        $("#edit-id").val("");
-        if (window.quillInstance) window.quillInstance.setText('');
-    };
+function renderGallery(){
+  gallery.classList.toggle('list', state.view === 'list');
+  const items = visibleItems();
+  if (!items.length) {
+    const none = !Object.keys(store).length;
+    gallery.innerHTML = `<div class="empty">${ico('book')}<h3>${none ? 'No studies yet' : 'Nothing found'}</h3><p>${none ? 'Check back soon for new material.' : 'Try another search or filter.'}</p></div>`;
+  } else gallery.innerHTML = items.map((x, i) => cardHTML(x.id, x.d, i)).join('');
+  const all = Object.values(store);
+  $('#st-count').text(all.length); $('#st-likes').text(fmt(all.reduce((s, d) => s + Math.max(0, d.likes||0), 0))); $('#st-views').text(fmt(all.reduce((s, d) => s + (d.views||0), 0)));
+}
 
-    window.processAndSave = async () => {
-        const id = $("#edit-id").val();
-        const theme = $("#theme").val();
-        const content = window.quillInstance ? window.quillInstance.root.innerHTML : "";
-        const file = $("#cover-upload")[0].files[0];
+$('#search').on('input', function(){ clearTimeout(this._t); this._t = setTimeout(() => { state.q = this.value.trim(); renderGallery(); }, 150); });
+$('#chips').on('click', '.chip', function(){ $('#chips .chip').removeClass('on'); $(this).addClass('on'); state.f = this.dataset.f; renderGallery(); });
+$('#sort').on('change', function(){ state.sort = this.value; renderGallery(); });
+function setViewIcon(){ const b = document.getElementById('view-toggle'); b.innerHTML = ico(state.view === 'list' ? 'grid' : 'list'); }
+$('#view-toggle').on('click', () => { state.view = state.view === 'list' ? 'grid' : 'list'; LS.set('bs_view', state.view); setViewIcon(); renderGallery(); });
+setViewIcon();
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && !document.body.classList.contains('reading')) { e.preventDefault(); $('#search').trigger('focus'); }
+});
 
-        if(!theme) return alert("Title required");
-        
-        $("#save-btn").text("SYNCING...").prop("disabled", true);
-        try {
-            let coverData = window.tempCover || "";
-            if(file) {
-                coverData = await new Promise(res => {
-                    const reader = new FileReader(); 
-                    reader.readAsDataURL(file);
-                    reader.onload = e => {
-                        const img = new Image(); 
-                        img.src = e.target.result;
-                        img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            canvas.width = 600; 
-                            canvas.height = 850;
-                            canvas.getContext('2d').drawImage(img, 0, 0, 600, 850);
-                            res(canvas.toDataURL('image/jpeg', 0.85));
-                        };
-                    };
-                });
-            }
+/* Card interactions (delegated) */
+gallery.addEventListener('click', e => {
+  const card = e.target.closest('.card'); if (!card) return;
+  const id = card.dataset.id, btn = e.target.closest('[data-act]');
+  if (!btn) return openReader(id);
+  e.stopPropagation();
+  const a = btn.dataset.act;
+  if (a === 'like') toggleLike(id, btn);
+  else if (a === 'save') toggleSave(id);
+  else if (a === 'share') shareStudy(id);
+  else if (a === 'edit') editEntry(id, e);
+  else if (a === 'del') deleteEntry(id, e);
+});
+gallery.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList.contains('card')) openReader(e.target.dataset.id); });
+gallery.addEventListener('pointermove', e => {
+  if (e.pointerType !== 'mouse') return;
+  const c = e.target.closest('.card'); if (!c || state.view === 'list') return;
+  const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+  c.style.setProperty('--ry', (x * 9) + 'deg'); c.style.setProperty('--rx', (-y * 9) + 'deg');
+});
+gallery.addEventListener('pointerout', e => { const c = e.target.closest('.card'); if (c) { c.style.setProperty('--rx', '0deg'); c.style.setProperty('--ry', '0deg'); } });
 
-            const data = { 
-                theme, 
-                content, 
-                cover: coverData, 
-                reference: $("#reference").val(), 
-                updated: Date.now() 
-            };
+/* ---------- Likes / saves / views ---------- */
+let warnedLike = false;
+function burst(el){
+  if (!el) return; const r = el.getBoundingClientRect();
+  for (let i = 0; i < 7; i++) {
+    const h = document.createElement('span'); h.className = 'heart-fly'; h.textContent = '♥';
+    h.style.left = (r.left + r.width / 2) + 'px'; h.style.top = (r.top + r.height / 2) + 'px'; h.style.setProperty('--dx', ((Math.random() - .5) * 90) + 'px');
+    h.style.animationDelay = (i * 40) + 'ms'; document.body.appendChild(h); setTimeout(() => h.remove(), 1200);
+  }
+}
+function syncLikeUI(id){
+  const d = store[id]; if (!d) return; const liked = isLiked(id);
+  document.querySelectorAll('[data-like-id="' + id + '"]').forEach(b => { b.classList.toggle('liked', liked); b.querySelector('b').textContent = fmt(d.likes); });
+  if (R.id === id) { $('#rd-like').toggleClass('on', liked); }
+  $('#st-likes').text(fmt(Object.values(store).reduce((s, x) => s + Math.max(0, x.likes||0), 0)));
+}
+async function toggleLike(id, el){
+  const d = store[id]; if (!d) return;
+  const set = getSet('bs_liked'), was = set.has(id);
+  if (was) { set.delete(id); d.likes = Math.max(0, (d.likes||0) - 1); } else { set.add(id); d.likes = (d.likes||0) + 1; burst(el); }
+  LS.set('bs_liked', [...set]); syncLikeUI(id);
+  try { await updateDoc(doc(db, 'booklets', id), { likes: increment(was ? -1 : 1) }); }
+  catch (e) { if (!warnedLike) { warnedLike = true; toast('Like saved on this device only. Allow public likes in Firestore rules to sync.', 'warn', 5200); } }
+}
+function toggleSave(id){
+  const set = getSet('bs_saved'); let on;
+  if (set.has(id)) { set.delete(id); on = false; } else { set.add(id); on = true; }
+  LS.set('bs_saved', [...set]); toast(on ? 'Saved to your list' : 'Removed from saved');
+  document.querySelectorAll('.card[data-id="' + id + '"] .save').forEach(b => b.classList.toggle('on', on));
+  if (R.id === id) $('#rd-save').toggleClass('on', on);
+  if (state.f === 'saved') renderGallery();
+}
+const viewedNow = new Set();
+async function countView(id){
+  if (viewedNow.has(id) || !store[id]) return; viewedNow.add(id);
+  store[id].views = (store[id].views||0) + 1;
+  document.querySelectorAll('.card[data-id="' + id + '"] .card-meta .meta-btn:nth-child(2)').forEach(s => s.innerHTML = ico('eye', 15) + fmt(store[id].views));
+  try { await updateDoc(doc(db, 'booklets', id), { views: increment(1) }); } catch (e) {}
+}
 
-            if(id) {
-                await updateDoc(doc(db, "booklets", id), data);
-            } else {
-                await addDoc(collection(db, "booklets"), data);
-            }
-            
-            location.reload();
-        } catch(e) { 
-            alert("Save error: " + e.message); 
-            $("#save-btn").text(id ? "UPDATE" : "PUBLISH").prop("disabled", false); 
-        }
-    };
+/* ---------- Share ---------- */
+let shareCtx = null;
+const enc = encodeURIComponent;
+const CHANNELS = [
+  { n:'WhatsApp', g:'W', c:'#25D366', u:(t, l) => 'https://wa.me/?text=' + enc(t + ' ' + l) },
+  { n:'Telegram', g:'T', c:'#27A7E7', u:(t, l) => 'https://t.me/share/url?url=' + enc(l) + '&text=' + enc(t) },
+  { n:'X', g:'X', c:'#ffffff', u:(t, l) => 'https://twitter.com/intent/tweet?text=' + enc(t) + '&url=' + enc(l) },
+  { n:'Facebook', g:'f', c:'#1877F2', u:(t, l) => 'https://www.facebook.com/sharer/sharer.php?u=' + enc(l) },
+  { n:'Email', g:'@', c:'#d4af37', u:(t, l) => 'mailto:?subject=' + enc(t) + '&body=' + enc(t + '\n\n' + l) },
+  { n:'SMS', g:'✉', c:'#9be28f', u:(t, l) => 'sms:?&body=' + enc(t + ' ' + l) }
+];
+async function shareItem(item){
+  shareCtx = item;
+  if (navigator.share && matchMedia('(pointer:coarse)').matches) {
+    try { await navigator.share({ title: item.title, text: item.text, url: item.url }); return; }
+    catch (e) { if (e.name === 'AbortError') return; }
+  }
+  $('#share-title').text(item.title); $('#share-url').val(item.url);
+  let html = CHANNELS.map((c, i) => `<button class="share-opt" data-i="${i}" style="--c:${c.c}"><b>${c.g}</b>${c.n}</button>`).join('');
+  if (item.quote) html += `<button class="share-opt" data-i="img"><b>${ico('image', 18)}</b>Image</button>`;
+  if (item.quote) html += `<button class="share-opt" data-i="txt"><b>${ico('copy', 18)}</b>Copy text</button>`;
+  $('#share-grid').html(html); $('#share-modal').addClass('open');
+}
+$('#share-grid').on('click', '.share-opt', function(){
+  const i = this.dataset.i, s = shareCtx; if (!s) return;
+  if (i === 'img') return downloadCard(s.quote, s.source || s.title);
+  if (i === 'txt') return copyText(s.text).then(() => toast('Text copied'));
+  window.open(CHANNELS[+i].u(s.text || s.title, s.url), '_blank', 'noopener');
+});
+$('#share-copy').on('click', () => copyText($('#share-url').val()).then(() => toast('Link copied')));
+$('#share-close').on('click', () => $('#share-modal').removeClass('open'));
+$('.overlay').on('mousedown', function(e){ if (e.target === this && this.id !== 'confirm-modal') $(this).removeClass('open'); });
+function shareStudy(id){ const d = store[id]; if (!d) return; shareItem({ title: d.theme || 'Bible Study', text: 'Read "' + (d.theme || 'Bible Study') + '" on BIBLE STUDY', url: linkFor(id) }); }
 
-    window.openReader = (id) => {
-        const data = window.bookletStore[id];
-        if (!data) return alert("Record not found.");
+/* ---------- Data ---------- */
+let firstLoad = true;
+async function fetchData(){
+  $('#gallery').html('<div class="skeleton"></div>'.repeat(4));
+  try {
+    const snap = await getDocs(query(collection(db, 'booklets'), orderBy('updated', 'desc')));
+    Object.keys(store).forEach(k => delete store[k]);
+    snap.forEach(s => { const d = s.data(); d._id = s.id; store[s.id] = d; });
+    renderGallery();
+    if (firstLoad) { firstLoad = false; checkHash(); }
+  } catch (err) {
+    console.error('Firestore Error:', err);
+    gallery.innerHTML = `<div class="empty">${ico('x')}<h3>Could not load studies</h3><p>${esc(err.message)}</p></div>`;
+  }
+}
+onAuthStateChanged(auth, user => {
+  document.body.classList.toggle('is-admin', !!user);
+  if (firstLoad && !window._fetching) { window._fetching = true; fetchData(); }
+});
 
-        $("#viewer").fadeIn(200);
-        const fb = $("#flipbook").empty();
+/* ---------- Admin editor ---------- */
+function setCoverPreview(src){
+  const im = document.getElementById('cover-preview');
+  if (src) { im.src = src; im.style.display = 'block'; $('#cover-remove').show(); } else { im.removeAttribute('src'); im.style.display = 'none'; $('#cover-remove').hide(); }
+}
+$('#cover-upload').on('change', async function(){
+  const f = this.files[0]; if (!f) return;
+  try { window.tempCover = await processCover(f); setCoverPreview(window.tempCover); updateEditorStats(); saveDraft(); }
+  catch (e) { toast('Could not read that image', 'error'); }
+});
+$('#cover-remove').on('click', () => { window.tempCover = ''; $('#cover-upload').val(''); setCoverPreview(''); updateEditorStats(); });
+$('#theme, #reference').on('input', saveDraft);
 
-        if (data.cover && data.cover.trim().length > 0) {
-            fb.append(`
-                <div class="page active">
-                    <img src="${data.cover}" class="page-cover" alt="Booklet Cover">
-                    <div class="cover-overlay">TAP TO START READING</div>
-                </div>
-            `);
-        } else {
-            fb.append(`
-                <div class="page hard active">
-                    <div style="padding:30px; text-align:center;">
-                        <h2 style="font-size:1.6rem; font-family:'Orbitron'; color:var(--gold);">${data.theme || 'Untitled'}</h2>
-                        <p style="font-size:10px; margin-top:30px; color:#aaa; font-family:'Orbitron';">TAP TO BEGIN PAGE 1</p>
-                    </div>
-                </div>
-            `);
-        }
-
-        const contentHtml = data.content || "";
-        let pages = [];
-
-        if (contentHtml.includes('class="page-break"')) {
-            pages = contentHtml.split(/<div class="page-break"[^>]*>.*?<\/div>/gi);
-        } else {
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = contentHtml;
-            const children = Array.from(tempDiv.children);
-            
-            let currentPageHTML = "";
-            let blockCount = 0;
-
-            children.forEach((child) => {
-                currentPageHTML += child.outerHTML;
-                blockCount++;
-                if (blockCount >= 3) {
-                    pages.push(currentPageHTML);
-                    currentPageHTML = "";
-                    blockCount = 0;
-                }
-            });
-
-            if (currentPageHTML.trim().length > 0) pages.push(currentPageHTML);
-        }
-
-        pages = pages.filter(p => p.trim().length > 0);
-        if (pages.length === 0) pages = ["<p>No content available.</p>"];
-
-        pages.forEach((pageContent, i) => {
-            fb.append(`
-                <div class="page">
-                    <div class="page-content ql-editor">
-                        ${pageContent}
-                    </div>
-                    <div class="page-footer">
-                        <span>${data.theme || 'Archive'}</span>
-                        <span>PAGE ${i + 1} OF ${pages.length}</span>
-                    </div>
-                </div>
-            `);
-        });
-
-        const totalWords = contentHtml.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(Boolean).length;
-
-        fb.append(`
-            <div class="page hard">
-                <div style="padding: 30px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%;">
-                    <h3 style="font-family: var(--font-tech); color: var(--gold); margin-bottom: 10px; font-size: 1.2rem;">
-                        END OF RECORD
-                    </h3>
-                    <div style="width: 50px; height: 2px; background: var(--gold); margin: 15px auto; opacity: 0.6;"></div>
-                    <p style="font-size: 0.85rem; color: #fff; margin: 8px 0;"><strong>${data.theme || 'Untitled'}</strong></p>
-                    <div style="font-size: 11px; color: #aaa; margin-top: 15px; line-height: 1.8;">
-                        <div>Total Pages: <span style="color: var(--gold);">${pages.length}</span></div>
-                        <div>Total Words: <span style="color: var(--gold);">${totalWords}</span></div>
-                    </div>
-                    <p style="font-size:10px; margin-top:30px; color:var(--gold); font-family:'Orbitron';">TAP TO RETURN TO COVER</p>
-                </div>
-            </div>
-        `);
-
-        currentPage = 0;
-        totalPages = $("#flipbook .page").length;
-        updatePageVisibility();
-    };
-
-    window.nextPageLoop = () => {
-        currentPage = (currentPage + 1) % totalPages;
-        updatePageVisibility();
-    };
-
-    function updatePageVisibility() {
-        const pages = $("#flipbook .page");
-        pages.removeClass("active");
-        $(pages[currentPage]).addClass("active");
+window.openCreator = () => {
+  $("#admin-modal-title").text("ARCHIVE COMPILER");
+  $("#save-btn").text("PUBLISH").prop('disabled', false);
+  $("#edit-id").val("");
+  $("#theme, #reference, #cover-upload").val("");
+  window.tempCover = ""; setCoverPreview('');
+  $("#admin-panel").css('display', 'flex').hide().fadeIn(200, async () => {
+    if (initQuillEditor() && window.quillInstance) {
+      window.quillInstance.setText('');
+      const dr = LS.get('bs_draft', null);
+      if (dr && (dr.theme || (dr.content && plainText(dr.content)))) {
+        if (await confirmDialog({ title: 'RESTORE DRAFT?', msg: 'An unsaved draft was found' + (dr.theme ? ' ("' + dr.theme + '")' : '') + '. Restore it?', ok: 'RESTORE', danger: false })) {
+          $('#theme').val(dr.theme || ''); $('#reference').val(dr.reference || '');
+          window.tempCover = dr.cover || ''; setCoverPreview(window.tempCover);
+          window.quillInstance.clipboard.dangerouslyPasteHTML(dr.content || '');
+        } else LS.set('bs_draft', null);
+      }
     }
+  });
+};
 
-    window.deleteEntry = async (id, event) => {
-        if(event) event.stopPropagation();
-        if(confirm("Confirm deletion?")) { 
-            await deleteDoc(doc(db, "booklets", id)); 
-            location.reload(); 
-        }
-    };
+window.editEntry = (id, event) => {
+  if (event) event.stopPropagation();
+  const data = store[id];
+  if (!data) return alert("Record unavailable for editing.");
+  $("#admin-modal-title").text("EDIT ARCHIVE RECORD");
+  $("#save-btn").text("UPDATE").prop('disabled', false);
+  $("#edit-id").val(id);
+  $("#theme").val(data.theme || "");
+  $("#reference").val(data.reference || "");
+  $("#cover-upload").val("");
+  window.tempCover = data.cover || ""; setCoverPreview(window.tempCover);
+  $("#admin-panel").css('display', 'flex').hide().fadeIn(200, () => {
+    if (initQuillEditor() && window.quillInstance) window.quillInstance.clipboard.dangerouslyPasteHTML(data.content || "");
+  });
+};
 
-    window.closeViewer = (e) => { 
-        if(e) e.stopPropagation();
-        $("#viewer").fadeOut(200); 
-        $("#flipbook").empty(); 
-    };
+window.closeAdmin = () => {
+  $("#admin-panel").fadeOut();
+  $("#edit-id").val("");
+  if (window.quillInstance) window.quillInstance.setText('');
+};
 
-    window.generatePDF = async (e) => {
-        if(e) e.stopPropagation();
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'pt', 'a4');
-        const pgs = document.querySelectorAll('.page');
-        for (let i = 0; i < pgs.length; i++) {
-            pgs[i].style.display = 'block';
-            const canvas = await html2canvas(pgs[i], { scale: 2, useCORS: true, allowTaint: true });
-            pgs[i].style.display = '';
-            if (i > 0) pdf.addPage();
-            pdf.addImage(canvas.toDataURL('image/jpeg', 1.0), 'JPEG', 0, 0, 595, 842);
-        }
-        updatePageVisibility();
-        pdf.save("Record_Export.pdf");
-    };
+window.processAndSave = async () => {
+  const id = $("#edit-id").val();
+  const theme = $("#theme").val().trim();
+  const content = window.quillInstance ? window.quillInstance.root.innerHTML : "";
+  if (!theme) return alert("Title required");
+  const coverData = window.tempCover || "";
+  if (content.length + coverData.length > 950000) return alert("This record is too large for one Firestore document (limit ~1 MB). Remove or shrink images, or split it into two studies.");
 
-    onAuthStateChanged(auth, (user) => {
-        if(user) { $(".admin-only").css('display','flex'); $("#login-btn").hide(); }
-        fetchData();
-    });
+  $("#save-btn").text("SYNCING...").prop("disabled", true);
+  try {
+    const data = { theme, content, cover: coverData, reference: $("#reference").val().trim(), updated: Date.now() };
+    if (id) await updateDoc(doc(db, "booklets", id), data);
+    else await addDoc(collection(db, "booklets"), Object.assign({ likes: 0, views: 0 }, data));
+    LS.set('bs_draft', null);
+    closeAdmin(); toast(id ? 'Study updated' : 'Study published');
+    await fetchData();
+  } catch (e) {
+    alert("Save error: " + e.message);
+    $("#save-btn").text(id ? "UPDATE" : "PUBLISH").prop("disabled", false);
+  }
+};
 
-    const fetchData = async () => {
-        try {
-            const snap = await getDocs(query(collection(db, "booklets"), orderBy("updated", "desc")));
-            const gal = $("#gallery").empty();
-            window.bookletStore = {};
-            
-            snap.forEach(d => {
-                const data = d.data();
-                window.bookletStore[d.id] = data;
+window.deleteEntry = async (id, event) => {
+  if (event) event.stopPropagation();
+  if (await confirmDialog({ title: 'DELETE STUDY', msg: 'Delete "' + ((store[id] || {}).theme || 'Untitled') + '" permanently? This cannot be undone.', ok: 'DELETE' })) {
+    try { await deleteDoc(doc(db, "booklets", id)); toast('Deleted'); await fetchData(); }
+    catch (e) { toast('Delete failed: ' + e.message, 'error', 4000); }
+  }
+};
 
-                gal.append(`
-                    <div class="card" onclick="openReader('${d.id}')">
-                        <img src="${data.cover || 'https://via.placeholder.com/250x350?text=No+Cover'}">
-                        <h4>${data.theme || 'Untitled'}</h4>
-                        <div class="admin-only" style="display:${auth.currentUser?'flex':'none'}; justify-content:center; gap:8px; margin-top:10px;">
-                            <button class="btn" style="padding:5px 10px; flex:1;" onclick="editEntry('${d.id}', event)">EDIT</button>
-                            <button class="btn btn-danger" style="padding:5px 10px; flex:1;" onclick="deleteEntry('${d.id}', event)">DEL</button>
-                        </div>
-                    </div>
-                `);
-            });
-        } catch(err) {
-            console.error("Firestore Error:", err);
-        }
-    };
+$('#preview-btn').on('click', () => {
+  const q = window.quillInstance; if (!q) return;
+  renderReader({ theme: $('#theme').val().trim() || 'Preview', content: q.root.innerHTML, cover: window.tempCover || '', reference: $('#reference').val().trim() }, null, { preview: true });
+});
+
+/* ---------- Reader ---------- */
+const R = { id: null, data: null, preview: false, blocks: [], pages: [], cur: 0, total: 0, listening: false, tts: 0, toc: [] };
+const prefs = Object.assign({ size: innerWidth < 600 ? 15 : 17, theme: 'night', font: 'sans' }, LS.get('bs_prefs', {}));
+const $v = $('#viewer');
+function applyPrefs(){
+  $v.attr('data-theme', prefs.theme).attr('data-font', prefs.font)[0].style.setProperty('--reader-size', prefs.size + 'px');
+  $('#set-size').val(prefs.size);
+  $('#set-theme button').each(function(){ $(this).toggleClass('on', this.dataset.v === prefs.theme); });
+  $('#set-font button').each(function(){ $(this).toggleClass('on', this.dataset.v === prefs.font); });
+  LS.set('bs_prefs', prefs);
+}
+let repagT;
+$('#set-size').on('input', function(){ prefs.size = +this.value; applyPrefs(); clearTimeout(repagT); repagT = setTimeout(rebuild, 250); });
+$('#set-theme').on('click', 'button', function(){ prefs.theme = this.dataset.v; applyPrefs(); });
+$('#set-font').on('click', 'button', function(){ prefs.font = this.dataset.v; applyPrefs(); clearTimeout(repagT); repagT = setTimeout(rebuild, 250); });
+$('#rd-aa').on('click', e => { e.stopPropagation(); $('#reader-settings').toggleClass('open'); });
+applyPrefs();
+
+function limitHeight(){ return document.getElementById('flipbook').clientHeight - 42; }
+function autoPaginate(blocks){
+  const fb = document.getElementById('flipbook'), lim = limitHeight();
+  if (lim < 120) { const out = []; for (let i = 0; i < blocks.length; i += 3) out.push(blocks.slice(i, i + 3).join('')); return out; }
+  const m = document.createElement('div'); m.className = 'page-content ql-editor';
+  m.style.cssText = 'position:absolute;visibility:hidden;left:-9999px;top:0;height:auto;overflow:visible;width:' + fb.clientWidth + 'px;flex:none';
+  $v[0].appendChild(m);
+  const pages = []; let cur = [];
+  blocks.forEach(b => {
+    m.innerHTML = cur.join('') + b;
+    if (m.scrollHeight > lim && cur.length) { pages.push(cur.join('')); cur = [b]; } else cur.push(b);
+  });
+  if (cur.length) pages.push(cur.join(''));
+  m.remove(); return pages;
+}
+function paginate(html){
+  const clean = sanitizeHTML(html || '');
+  if (/class="[^"]*page-break/.test(clean)) return clean.split(/<div class="page-break"[^>]*>[\s\S]*?<\/div>/gi);
+  const t = document.createElement('div'); t.innerHTML = clean;
+  const blocks = Array.from(t.children).map(c => c.outerHTML);
+  if (!blocks.length && clean.trim()) blocks.push('<p>' + clean + '</p>');
+  return autoPaginate(blocks);
+}
+
+function buildFlipbook(){
+  const data = R.data, fb = $('#flipbook').empty();
+  const hasCover = data.cover && data.cover.trim().length > 0;
+  if (hasCover) {
+    fb.append(`<div class="page active"><img src="${esc(data.cover)}" class="page-cover" alt="Booklet Cover"><div class="cover-overlay">TAP TO START READING</div></div>`);
+  } else {
+    fb.append(`<div class="page hard active"><div style="padding:30px;text-align:center"><h2 style="font-size:1.6rem;font-family:'Orbitron';color:var(--gold)">${esc(data.theme || 'Untitled')}</h2><p style="font-size:10px;margin-top:30px;color:#aaa;font-family:'Orbitron'">TAP TO BEGIN PAGE 1</p></div></div>`);
+  }
+  let pages = paginate(data.content).filter(p => p.trim().length > 0);
+  if (!pages.length) pages = ["<p>No content available.</p>"];
+  R.toc = [{ t: 'Cover', p: 0 }];
+  pages.forEach((pc, i) => {
+    fb.append(`<div class="page"><div class="page-content ql-editor">${pc}</div><div class="page-footer"><span>${esc(data.theme || 'Archive')}</span><span>PAGE ${i + 1} OF ${pages.length}</span></div></div>`);
+    const tmp = document.createElement('div'); tmp.innerHTML = pc;
+    const hs = tmp.querySelectorAll('h1,h2');
+    if (hs.length) hs.forEach(h => R.toc.push({ t: h.textContent.trim().slice(0, 60), p: i + 1 }));
+    else R.toc.push({ t: (tmp.textContent.trim().slice(0, 48) || 'Page ' + (i + 1)) + '…', p: i + 1, dim: 1 });
+  });
+  const words = plainText(data.content).split(/\s+/).filter(Boolean).length;
+  fb.append(`<div class="page hard"><div style="padding:30px;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%">
+    <h3 style="font-family:var(--font-tech);color:var(--gold);margin-bottom:10px;font-size:1.2rem">END OF RECORD</h3>
+    <div style="width:50px;height:2px;background:var(--gold);margin:15px auto;opacity:.6"></div>
+    <p style="font-size:.85rem;color:#fff;margin:8px 0"><strong>${esc(data.theme || 'Untitled')}</strong></p>
+    <div style="font-size:11px;color:#aaa;margin-top:15px;line-height:1.8"><div>Total Pages: <span style="color:var(--gold)">${pages.length}</span></div><div>Total Words: <span style="color:var(--gold)">${words}</span></div><div>Reading time: <span style="color:var(--gold)">${Math.max(1, Math.ceil(words / 200))} min</span></div></div>
+    <p style="font-size:10px;margin-top:30px;color:var(--gold);font-family:'Orbitron'">TAP TO RETURN TO COVER</p></div></div>`);
+  R.toc.push({ t: 'End of record', p: pages.length + 1 });
+  R.total = $("#flipbook .page").length;
+  $('#pg-slider').attr('max', R.total - 1);
+  $('#toc-list').html(R.toc.map(x => `<li data-p="${x.p}"><div style="${x.dim ? 'color:#999' : ''}">${esc(x.t)}</div><span>${x.p === 0 ? 'COVER' : 'P' + x.p}</span></li>`).join(''));
+}
+function rebuild(){
+  if (!R.data || $v.css('display') === 'none') return;
+  const ratio = R.total > 1 ? R.cur / (R.total - 1) : 0;
+  buildFlipbook(); R.cur = Math.min(R.total - 1, Math.round(ratio * (R.total - 1))); showPage(R.cur, 0);
+}
+
+function showPage(n, dir){
+  const pages = $("#flipbook .page"); if (!pages.length) return;
+  R.cur = Math.max(0, Math.min(pages.length - 1, n));
+  pages.removeClass("active flip-next flip-prev");
+  const el = $(pages[R.cur]).addClass("active");
+  if (dir) { el.addClass(dir > 0 ? 'flip-next' : 'flip-prev'); setTimeout(() => el.removeClass('flip-next flip-prev'), 600); }
+  const pct = R.total > 1 ? R.cur / (R.total - 1) * 100 : 100;
+  $('#read-progress i').css('width', pct + '%');
+  $('#pg-slider').val(R.cur); $('#pg-counter').text((R.cur + 1) + ' / ' + R.total);
+  $('#toc-list li').each(function(){ $(this).removeClass('cur'); });
+  const curToc = [...R.toc].filter(x => x.p <= R.cur).pop(); if (curToc) $('#toc-list li[data-p="' + curToc.p + '"]').last().addClass('cur');
+  if (R.id) setProg(R.id, R.cur, R.total);
+  if (R.listening) speakCurrent();
+}
+function goTo(n, dir){ showPage(n, dir == null ? (n > R.cur ? 1 : -1) : dir); }
+window.nextPageLoop = () => { R.cur = (R.cur + 1) % R.total; showPage(R.cur, R.cur === 0 ? -1 : 1); };
+function prevPage(){ if (R.cur > 0) showPage(R.cur - 1, -1); }
+
+function syncReaderButtons(){
+  const id = R.id;
+  $('#rd-like').toggleClass('on', !!id && isLiked(id)).attr('data-like-id', id || '');
+  $('#rd-save').toggleClass('on', !!id && isSaved(id));
+  const ref = R.data && R.data.reference;
+  if (ref && /^https?:\/\//i.test(ref)) $('#rd-ref').attr('href', ref).css('display', 'inline-flex'); else $('#rd-ref').hide();
+}
+
+function renderReader(data, id, opts){
+  opts = opts || {};
+  R.id = id; R.data = data; R.preview = !!opts.preview; R.cur = 0;
+  $v.toggleClass('preview', R.preview);
+  document.body.classList.add('no-scroll', 'reading');
+  $v.stop(true, true).fadeIn(200, () => {
+    buildFlipbook(); showPage(0, 0); syncReaderButtons();
+    $('#viewer-title').text(data.theme || 'Untitled');
+    const pr = id && getProg(id);
+    if (pr && pr.page > 0 && pr.page < pr.total - 1) toast('Continue where you left off?', '', 6000, { label: 'RESUME P' + pr.page, fn: () => goTo(Math.min(pr.page, R.total - 1)) });
+    loadNotes();
+  });
+  $('#nav-hint').removeClass('hide'); setTimeout(() => $('#nav-hint').addClass('hide'), 4500);
+  $('#viewer-title').text(data.theme || 'Untitled');
+  if (id) { history.replaceState(null, '', '#read=' + id); document.title = (data.theme || 'Study') + ' · BIBLE STUDY'; countView(id); }
+}
+window.openReader = id => {
+  const data = store[id];
+  if (!data) return alert("Record not found.");
+  renderReader(data, id);
+};
+
+window.closeViewer = e => {
+  if (e) e.stopPropagation();
+  stopListen(); $('#drawer').removeClass('open'); $('#reader-settings').removeClass('open'); $('#sel-tip').removeClass('open');
+  if (document.fullscreenElement) document.exitFullscreen();
+  $v.fadeOut(200); $("#flipbook").empty();
+  document.body.classList.remove('no-scroll', 'reading'); document.title = 'BIBLE STUDY';
+  if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+  R.id = null; R.data = null;
+  if (state.f === 'progress') renderGallery(); else renderGallery();
+};
+
+function checkHash(){
+  const m = location.hash.match(/^#read=(.+)$/);
+  if (m && store[m[1]] && $v.css('display') === 'none') openReader(m[1]);
+  else if (m && !store[m[1]]) toast('That study could not be found', 'warn');
+}
+addEventListener('hashchange', () => { if (!Object.keys(store).length) return; if (!location.hash && $v.css('display') !== 'none') closeViewer(); else checkHash(); });
+
+/* Reader navigation: tap zones, buttons, keys, swipe */
+const vp = document.getElementById('book-viewport');
+vp.addEventListener('click', e => {
+  if (e.target.closest('.edge-btn, a, button, .sel-tip')) return;
+  const s = window.getSelection(); if (s && String(s).trim()) return;
+  $('#reader-settings').removeClass('open');
+  const r = vp.getBoundingClientRect();
+  if ((e.clientX - r.left) / r.width < .28 && R.cur > 0) prevPage(); else nextPageLoop();
+});
+$('#edge-l').on('click', e => { e.stopPropagation(); prevPage(); });
+$('#edge-r').on('click', e => { e.stopPropagation(); nextPageLoop(); });
+$('#pg-slider').on('input', function(){ goTo(+this.value); });
+let tx = 0, ty = 0;
+vp.addEventListener('touchstart', e => { tx = e.changedTouches[0].clientX; ty = e.changedTouches[0].clientY; }, { passive: true });
+vp.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+  if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) { e.preventDefault(); dx < 0 ? nextPageLoop() : prevPage(); }
+}, { passive: false });
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const open = $('.overlay.open').last();
+    if (open.length) { open.removeClass('open'); if (open[0].id === 'confirm-modal') $('#cf-no').trigger('click'); return; }
+    if ($('#reader-settings').hasClass('open')) return $('#reader-settings').removeClass('open');
+    if ($('#drawer').hasClass('open')) return $('#drawer').removeClass('open');
+    if ($v.css('display') !== 'none') return closeViewer();
+    if ($('#admin-panel').css('display') !== 'none') return closeAdmin();
+    return;
+  }
+  if ($v.css('display') === 'none' || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) || document.activeElement.isContentEditable) return;
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); nextPageLoop(); }
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prevPage(); }
+  else if (e.key === 'Home') goTo(0);
+  else if (e.key === 'End') goTo(R.total - 1);
+  else if ((e.key === 'f' || e.key === 'F')) $('#rd-full').trigger('click');
+  else if ((e.key === 'l' || e.key === 'L') && R.id) toggleLike(R.id, document.getElementById('rd-like'));
+});
+
+/* Reader actions */
+$('#rd-like').on('click', function(){ if (R.id) toggleLike(R.id, this); });
+$('#rd-save').on('click', () => { if (R.id) toggleSave(R.id); });
+$('#rd-share').on('click', () => { if (R.id) shareStudy(R.id); });
+$('#rd-full').on('click', () => { if (document.fullscreenElement) document.exitFullscreen(); else if ($v[0].requestFullscreen) $v[0].requestFullscreen().catch(() => {}); else toast('Fullscreen not supported here'); });
+addEventListener('resize', () => { clearTimeout(repagT); repagT = setTimeout(rebuild, 400); });
+
+/* Contents & notes drawer */
+$('#rd-toc').on('click', e => { e.stopPropagation(); $('#drawer').toggleClass('open'); });
+$('#drawer-close').on('click', () => $('#drawer').removeClass('open'));
+$('.tabs').on('click', 'button', function(){
+  $('.tabs button').removeClass('on'); $(this).addClass('on');
+  $('#tab-toc').prop('hidden', this.dataset.tab !== 'toc'); $('#tab-notes').prop('hidden', this.dataset.tab !== 'notes');
+});
+$('#toc-list').on('click', 'li', function(){ goTo(+this.dataset.p); if (innerWidth < 600) $('#drawer').removeClass('open'); });
+const noteKey = () => 'bs_notes_' + (R.id || 'preview');
+function loadNotes(){ $('#notes-area').val(LS.get(noteKey(), '')); $('#notes-status').text(''); }
+let noteT;
+$('#notes-area').on('input', function(){ clearTimeout(noteT); noteT = setTimeout(() => { LS.set(noteKey(), this.value); $('#notes-status').text('Saved'); }, 400); });
+$('#notes-copy').on('click', () => copyText($('#notes-area').val()).then(() => toast('Notes copied')));
+$('#notes-clear').on('click', async () => { if ($('#notes-area').val() && await confirmDialog({ title: 'CLEAR NOTES', msg: 'Delete your notes for this study?', ok: 'CLEAR' })) { $('#notes-area').val(''); LS.set(noteKey(), ''); } });
+
+/* Selection tooltip: share / copy / image / note */
+let selText = '', selT;
+document.addEventListener('selectionchange', () => {
+  clearTimeout(selT);
+  selT = setTimeout(() => {
+    const s = window.getSelection(), tip = $('#sel-tip');
+    if (!s || s.isCollapsed || $v.css('display') === 'none') return tip.removeClass('open');
+    const node = s.anchorNode && (s.anchorNode.nodeType === 1 ? s.anchorNode : s.anchorNode.parentElement);
+    if (!node || !node.closest || !node.closest('.page-content')) return tip.removeClass('open');
+    selText = String(s).trim(); if (selText.length < 3) return tip.removeClass('open');
+    const r = s.getRangeAt(0).getBoundingClientRect();
+    tip.css({ left: Math.min(Math.max(r.left + r.width / 2, 110), innerWidth - 110) + 'px', top: Math.max(70, r.top - 52) + 'px' }).addClass('open');
+  }, 180);
+});
+$('#sel-tip').on('mousedown touchstart', e => e.preventDefault());
+$('#sel-tip').on('click', '[data-sel]', function(e){
+  e.stopPropagation(); const a = this.dataset.sel, title = (R.data && R.data.theme) || 'Bible Study';
+  if (a === 'copy') copyText('“' + selText + '” — ' + title).then(() => toast('Quote copied'));
+  else if (a === 'card') downloadCard(selText, title);
+  else if (a === 'share') shareItem({ title, text: '“' + selText + '” — ' + title, url: R.id ? linkFor(R.id) : baseUrl(), quote: selText, source: title });
+  else if (a === 'note') { const v = $('#notes-area').val(); const nv = (v ? v + '\n\n' : '') + '“' + selText + '”\n'; $('#notes-area').val(nv).trigger('input'); toast('Added to notes'); }
+  window.getSelection().removeAllRanges(); $('#sel-tip').removeClass('open');
+});
+
+/* Read aloud (speech synthesis) */
+function updateListenBtn(){ $('#rd-listen').toggleClass('on', R.listening).html(ico(R.listening ? 'pause' : 'volume')); }
+function stopListen(){ R.listening = false; R.tts++; if ('speechSynthesis' in window) speechSynthesis.cancel(); updateListenBtn(); }
+function speakCurrent(){
+  if (!('speechSynthesis' in window)) return;
+  const token = ++R.tts; speechSynthesis.cancel();
+  const page = $("#flipbook .page")[R.cur]; if (!page) return;
+  const pc = page.querySelector('.page-content');
+  let text = pc ? pc.innerText : (page.innerText || '').replace(/TAP.*$/i, '');
+  text = (text || '').trim();
+  const advance = () => { if (token !== R.tts || !R.listening) return; if (R.cur < R.total - 1) goTo(R.cur + 1, 1); else stopListen(); };
+  if (!text) return setTimeout(advance, 700);
+  const chunks = text.match(/[^.!?\n]+[.!?]*\s*/g) || [text];
+  chunks.forEach((c, i) => { const t = c.trim(); if (!t) return; const u = new SpeechSynthesisUtterance(t); if (i === chunks.length - 1) u.onend = advance; speechSynthesis.speak(u); });
+}
+$('#rd-listen').on('click', () => {
+  if (!('speechSynthesis' in window)) return toast('Read-aloud is not supported in this browser', 'warn');
+  if (R.listening) return stopListen();
+  R.listening = true; updateListenBtn(); speakCurrent(); toast('Reading aloud…');
+});
+addEventListener('beforeunload', () => { if ('speechSynthesis' in window) speechSynthesis.cancel(); });
+
+/* ---------- PDF export ---------- */
+window.generatePDF = async e => {
+  if (e) e.stopPropagation();
+  if (!window.jspdf || !window.html2canvas) return toast('PDF libraries are still loading — try again', 'warn');
+  const { jsPDF } = window.jspdf, pdf = new jsPDF('p', 'pt', 'a4');
+  const pgs = document.querySelectorAll('#flipbook .page'); if (!pgs.length) return;
+  toast('Building PDF…', '', 2500);
+  const holder = document.createElement('div');
+  holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:595px;z-index:-1';
+  document.body.appendChild(holder);
+  const theme = getComputedStyle($v[0]);
+  let first = true;
+  try {
+    for (let i = 0; i < pgs.length; i++) {
+      const cl = pgs[i].cloneNode(true);
+      cl.classList.remove('active', 'flip-next', 'flip-prev');
+      const fixed = cl.classList.contains('hard') || cl.querySelector('.page-cover');
+      cl.style.cssText = 'display:flex;flex-direction:column;position:relative;width:595px;border-radius:0;box-shadow:none;animation:none;' + (fixed ? 'height:842px;' : 'height:auto;min-height:842px;') +
+        '--page-bg:' + theme.getPropertyValue('--page-bg') + ';--page-fg:' + theme.getPropertyValue('--page-fg') + ';--page-line:' + theme.getPropertyValue('--page-line') + ';--page-foot:' + theme.getPropertyValue('--page-foot') +
+        ';--reader-size:' + theme.getPropertyValue('--reader-size') + ';--reader-font:' + theme.getPropertyValue('--reader-font');
+      const pc = cl.querySelector('.page-content'); if (pc) pc.style.cssText = 'overflow:visible;flex:none;height:auto;padding:40px';
+      holder.innerHTML = ''; holder.appendChild(cl);
+      const canvas = await html2canvas(cl, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: null });
+      const sliceH = Math.round(842 * 2), slices = Math.max(1, Math.ceil(canvas.height / sliceH));
+      for (let s = 0; s < slices; s++) {
+        const part = document.createElement('canvas'); part.width = canvas.width; part.height = sliceH;
+        const x = part.getContext('2d'); x.fillStyle = theme.getPropertyValue('--page-bg').trim() || '#fff'; x.fillRect(0, 0, part.width, part.height);
+        x.drawImage(canvas, 0, s * sliceH, canvas.width, Math.min(sliceH, canvas.height - s * sliceH), 0, 0, canvas.width, Math.min(sliceH, canvas.height - s * sliceH));
+        if (!first) pdf.addPage(); first = false;
+        pdf.addImage(part.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 595, 842);
+      }
+    }
+    const name = ((R.data && R.data.theme) || 'Record').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_') || 'Record';
+    pdf.save(name + '_Export.pdf'); toast('PDF ready');
+  } catch (err) { console.error(err); toast('PDF export failed: ' + err.message, 'error', 4000); }
+  holder.remove();
+};
 </script>
 </body>
 </html>
